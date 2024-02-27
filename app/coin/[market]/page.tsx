@@ -1,6 +1,3 @@
-import Project from "../../../interfaces/Project";
-import metadata from "../../../metaData";
-
 import Market from "@/app/components/Market";
 
 export default function Page({ params }: { params: { market: string } }) {

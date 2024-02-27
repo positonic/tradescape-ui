@@ -4,8 +4,13 @@ import Chart from "@/app/components/Chart";
 import Trades from "@/app/components/Trades";
 import Orders from "./Orders";
 import Positions from "./Positions";
+import { useSearchParams } from "next/navigation";
 
 export default function Market({ market }: { market: string }) {
+  const searchParams = useSearchParams();
+
+  const since = searchParams ? searchParams.get("since") : undefined;
+
   const [positions, setPositions] = useState([]);
   const [trades, setTrades] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -17,7 +22,9 @@ export default function Market({ market }: { market: string }) {
         console.log("fetching trades for ", market);
         // Update the URL to match your Next.js API route
         const response = await fetch(
-          `/api/trades?exchangeId=binance&market=${encodeURIComponent(market)}`
+          `/api/trades?exchangeId=binance&market=${encodeURIComponent(
+            market
+          )}&since=${since}`
         );
         const data = await response.json();
         if (data.error) {

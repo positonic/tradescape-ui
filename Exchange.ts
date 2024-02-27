@@ -37,6 +37,7 @@ export interface NormalizedTrade {
   leverage: string;
   misc: string;
   exchange: string;
+  date: Date;
 }
 // Define the interface for the Trade array
 export type FetchTradesReturnType = Record<string, NormalizedTrade>;
@@ -75,6 +76,12 @@ export interface Position {
   duration: number; // in hours
   lastTime?: number;
 }
+
+/**
+ * Turn a list of trades into a list of orders
+ * @param trades
+ * @returns
+ */
 export function aggregateTrades(trades: NormalizedTrade[]): AggregatedOrder[] {
   const ordersMap: { [ordertxid: string]: AggregatedOrder } = {};
 
@@ -698,6 +705,7 @@ export default class Exchange {
             leverage: trade.leverage ?? "",
             misc: trade.misc ?? "",
             exchange: this.client.name,
+            date: new Date(Number(trade.timestamp)),
           };
           return [normalizedTrade.id, normalizedTrade]; // Ensure the key is a string
         }

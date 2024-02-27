@@ -4,6 +4,11 @@ import ccxt from "ccxt";
 import { parseExchangePair } from "@/utils";
 import { AggregatedOrder, aggregateTrades } from "@/Exchange";
 
+const sortDescending = (a: NormalizedTrade, b: NormalizedTrade) =>
+  b.time - a.time;
+const sortAscending = (a: NormalizedTrade, b: NormalizedTrade) =>
+  a.time - b.time;
+
 export interface NormalizedTrade {
   id: string;
   ordertxid: string;
@@ -74,7 +79,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
-  const since = undefined;
+  const since = req.query.since ? Number(req.query.since) : undefined;
   // Attempt to retrieve exchangeId from the query, with a fallback
   const exchangeIdRaw = req.query.exchangeId;
   const market = req.query.market;
@@ -102,10 +107,10 @@ export default async function handler(
       pair,
       since
     );
-    const trades: NormalizedTrade[] = Object.values(exchangeTrades);
-    const orders: AggregatedOrder[] = aggregateTrades(trades).sort(
-      (a, b) => b.time - a.time
-    );
+    const trades: NormalizedTrade[] =
+      Object.values(exchangeTrades).sort(sortAscending);
+    const orders: AggregatedOrder[] =
+      aggregateTrades(trades).sort(sortDescending);
     // Assuming the API response structure matches what you're expecting
     // Example usage:
 
