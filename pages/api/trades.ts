@@ -122,13 +122,13 @@ export default async function handler(
 // Helper to format duration
 const formatDuration = (durationInMs: number): string => {
   const durationInDays = durationInMs / (1000 * 60 * 60 * 24);
-  if (durationInDays < 1) return "less than a day";
-  if (durationInDays < 2) return "more than 1 day";
-  if (durationInDays < 3) return "more than 2 days";
-  if (durationInDays < 4) return "more than 3 days";
-  if (durationInDays < 7) return "more than 3 days";
-  if (durationInDays < 30) return "more than 1 week";
-  return "more than 1 month";
+  if (durationInDays < 1) return "< 1 day";
+  if (durationInDays < 2) return "> 1 day";
+  if (durationInDays < 3) return "> 2 days";
+  if (durationInDays < 4) return "> 3 days";
+  if (durationInDays < 7) return "> 7 days";
+  if (durationInDays < 30) return "> 1 week";
+  return "> 1 month";
 };
 
 // Parses orders and creates positions

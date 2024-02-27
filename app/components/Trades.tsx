@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { formatDateTime } from "@/utils";
-export default function Trades({ trades }: { trades: string }) {
+import { Trade } from "@/interfaces/Trade";
+import TradeRow from "./TradeRowPartial";
+export default function Trades({ trades }: { trades: Trade[] }) {
   const [error, setError] = useState("");
 
   return (
@@ -35,32 +37,8 @@ export default function Trades({ trades }: { trades: string }) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {trades.map((trade) => (
-              <tr key={trade.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {formatDateTime(trade.time)}
-                </td>
-
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {trade.type}
-                </td>
-
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {trade.vol}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {trade.pair.split("/")[0]}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {trade.exchange}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {trade.price}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {trade.cost}
-                </td>
-              </tr>
+            {trades.map((trade: Trade) => (
+              <TradeRow trade={trade} />
             ))}
           </tbody>
         </table>
