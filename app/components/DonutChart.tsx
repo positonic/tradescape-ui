@@ -1,5 +1,6 @@
 import React from "react";
-import { PieChart } from "@mantine/charts";
+import { DonutChart } from "@mantine/charts";
+import { formatCurrency } from "@/utils";
 
 // Define the shape of a single data entry
 interface Asset {
@@ -120,11 +121,11 @@ const CryptoPieChart: React.FC<Props> = ({ assets }) => {
   return (
     <>
       <h3>Pie chart</h3>
-      <PieChart
+      <DonutChart
         tooltipDataSource="segment"
         withTooltip
         data={dataWithColors}
-        label={(data) => `${data.label} (${data.value.toFixed(2)} USD)`}
+        label={(data) => `${data.label} (${formatCurrency(data.value)} USD)`}
         size={300}
       />
     </>
