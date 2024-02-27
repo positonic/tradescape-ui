@@ -6,6 +6,7 @@ import {
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import { useState } from "react";
+import { parseExchangePair } from "@/utils";
 
 const defaultWidgetProps: Partial<ChartingLibraryWidgetOptions> = {
   //const defaultWidgetProps: Partial<any> = {
@@ -25,24 +26,20 @@ const TVChartContainer = dynamic(
   () => import("./TVChartContainer").then((mod) => mod.TVChartContainer),
   { ssr: false }
 );
-const trades = [
-  { time: "2022-01-01", price: 48000, type: "Buy" },
-  { time: "2022-01-02", price: 47000, type: "Sell" },
-  { time: "2022-01-03", price: 47500, type: "Buy" },
-  { time: "2022-01-04", price: 48500, type: "Buy" },
-  { time: "2022-01-05", price: 49000, type: "Sell" },
-  { time: "2022-01-06", price: 49500, type: "Buy" },
-  { time: "2022-01-07", price: 50000, type: "Sell" },
-  { time: "2022-01-08", price: 50500, type: "Buy" },
-  { time: "2022-01-09", price: 51000, type: "Sell" },
-  { time: "2022-01-10", price: 51500, type: "Buy" },
-  // Continue adding more trades as needed
-];
-export default function Chart({ market }: { market: string }) {
+
+export default function Chart({
+  market,
+  trades,
+}: {
+  market: string;
+  trades: any;
+}) {
   const [isScriptReady, setIsScriptReady] = useState(false);
+  const { exchange, pair } = parseExchangePair(market);
+  defaultWidgetProps.symbol = `${exchange}:${pair}`;
+
   return (
     <div>
-      {/* <LightChart trades={trades} /> */}
       <Script
         src="/static/datafeeds/udf/dist/bundle.js"
         strategy="lazyOnload"
@@ -50,9 +47,14 @@ export default function Chart({ market }: { market: string }) {
           setIsScriptReady(true);
         }}
       />
-      {/* <div id="container_id" className="TVChartContainer" /> */}
 
-      {isScriptReady && <TVChartContainer {...defaultWidgetProps} />}
+      {isScriptReady && (
+        <TVChartContainer
+          market={market}
+          trades={trades}
+          {...defaultWidgetProps}
+        />
+      )}
     </div>
   );
 }

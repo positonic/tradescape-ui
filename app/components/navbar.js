@@ -8,6 +8,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 const Navbar = () => {
   const navigation = [
     { page: "Home", url: "/" },
+    { page: "Balances", url: "/balances" },
     { page: "Trades", url: "/coin/binance-btc_usdt" },
   ];
 

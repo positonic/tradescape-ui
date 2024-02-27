@@ -1,14 +1,15 @@
-import Project from "../../../interfaces/Project";
-import metadata from "../../../metaData";
+// import Project from "../../../interfaces/Project";
+// import metadata from "../../../metaData";
 
-import Market from "@/app/components/Market";
+import Balances from "@/app/components/Balances";
 
 export default function Page({ params }: { params: { market: string } }) {
   const { market } = params;
   return (
     <div className="container mx-auto">
       <div className="">
-        <Market market={market} />
+        <h2>Balances</h2>
+        <Balances />
       </div>
     </div>
   );

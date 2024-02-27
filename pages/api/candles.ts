@@ -1,6 +1,7 @@
 // pages/api/candles.js
 import type { NextApiRequest, NextApiResponse } from "next";
 import axios from "axios";
+import { parseExchangePair, transformExchangePairFormat } from "@/utils";
 
 type Time = {
   time: number;
@@ -28,9 +29,18 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
+  const market = req.query.market;
+  console.log("fetching candles for ", market);
+  const { exchange, pair } = parseExchangePair(
+    transformExchangePairFormat(market) as string
+  );
+  console.log("pair: ", pair);
+  const fsym = pair.split("/")[0];
+  const tsym = pair.split("/")[1];
+  //defaultWidgetProps.symbol = `${exchange}:${pair}`;
   const toTs = Math.floor(Date.now() / 1000); // Current timestamp in seconds
   const limit = "1000"; // Example: Get 1000 data points
-  const url = `https://min-api.cryptocompare.com/data/histoday?fsym=BTC&tsym=USD&toTs=${toTs}&limit=${limit}`;
+  const url = `https://min-api.cryptocompare.com/data/histoday?fsym=${fsym}&tsym=${tsym}&toTs=${toTs}&limit=${limit}`;
 
   try {
     const response = await axios.get(url);
