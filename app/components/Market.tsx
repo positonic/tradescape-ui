@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import Chart from "@/app/components/Chart";
 import Trades from "@/app/components/Trades";
+import TradingStats from "./TradeStats";
+import { calculateTradingStatistics } from "@/Stats";
 import Orders from "./Orders";
 import Positions from "./Positions";
 import { useSearchParams } from "next/navigation";
@@ -16,6 +18,7 @@ export default function Market({ market }: { market: string }) {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState("");
 
+  const statistics = calculateTradingStatistics(positions);
   useEffect(() => {
     const fetchTrades = async () => {
       try {
@@ -47,6 +50,7 @@ export default function Market({ market }: { market: string }) {
   return (
     <div className="container mx-auto">
       <div className="">
+        <TradingStats statistics={statistics} />
         <Chart market={market} trades={orders} />
         <h3>Positions</h3>
         <Positions positions={positions} />

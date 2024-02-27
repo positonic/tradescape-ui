@@ -3,18 +3,7 @@ import { useEffect, useState } from "react";
 import { Accordion } from "@mantine/core";
 import OrderRowPartial from "./OrderRowPartial";
 import { formatCurrency } from "@/utils";
-
-interface Position {
-  Date: string;
-  ProfitLoss: number | null;
-  Duration: string;
-  PositionType: "long" | "short";
-  AverageEntryPrice: number;
-  AverageExitPrice: number;
-  TotalCostBuy: number | null;
-  TotalCostSell: number | null;
-  Orders: any[];
-}
+import Position from "@/interfaces/Position";
 
 interface PositionsProps {
   positions: Position[];
