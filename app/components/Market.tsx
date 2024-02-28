@@ -50,13 +50,19 @@ export default function Market({ market }: { market: string }) {
   return (
     <div className="container mx-auto">
       <div className="">
-        <TradingStats statistics={statistics} />
+        <h1>{market}</h1>
+
         <Chart market={market} trades={orders} />
         <h3>Positions</h3>
         <Positions positions={positions} />
         <h3>Orders</h3>
         <Orders orders={orders} />
-
+        <div className="flex">
+          <div className="w-[400px] p-4 text-white"></div>
+          <div className="flex-grow p-4 text-white">
+            <TradingStats statistics={statistics} />
+          </div>
+        </div>
         {/* <Trades trades={trades} /> */}
       </div>
     </div>

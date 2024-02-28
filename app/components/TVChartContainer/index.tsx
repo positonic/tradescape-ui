@@ -106,15 +106,7 @@ export const TVChartContainer = (props: Partial<TVChartContainerProps>) => {
 
   return (
     <>
-      <header className={styles.VersionHeader}>
-        <br />
-        <p>
-          <Link href="/coin/binance-btc_usdt">BTC / USDT</Link>
-        </p>
-        <p>
-          <Link href="/coin/bybit-matic_usdt">MATIC / USDT</Link>
-        </p>
-      </header>
+      <header className={styles.VersionHeader}></header>
       <div
         id="container_id"
         ref={chartContainerRef}

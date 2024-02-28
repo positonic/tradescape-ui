@@ -17,16 +17,21 @@ const BalanceHistoryChart: React.FC<BalanceHistoryChartProps> = ({
   balanceHistory,
 }) => {
   // Transform BalanceHistoryItem[] into Sparkline data
-  console.log("BalanceHistory is ", balanceHistory);
-  console.log("Typeof BalanceHistory is ", typeof balanceHistory);
+
   const data = balanceHistory
     ? balanceHistory.map((item) => ({
         Balance: item.totalBalance,
-        date: new Date(item.timestamp).toLocaleDateString(),
+        date: new Date(item.timestamp).toLocaleString("en-UK", {
+          year: "2-digit", // "2021"
+          month: "short", // "July"
+          day: "numeric", // "19"
+          hour: "2-digit", // "12" AM/PM format
+          minute: "2-digit", // "00"
+          hour12: true, // Use AM/PM
+        }),
       }))
     : [];
 
-  console.log("BalanceHistory", data);
   return (
     <div>
       <h2>Balance History</h2>

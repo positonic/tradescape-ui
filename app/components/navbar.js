@@ -4,6 +4,7 @@ import ThemeChanger from "./DarkSwitch";
 import Image from "next/image";
 import { Disclosure } from "@headlessui/react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Search from "./Search";
 
 const Navbar = () => {
   const navigation = [
@@ -93,6 +94,7 @@ const Navbar = () => {
               </li>
             ))}
           </ul>
+          <Search />
         </div>
 
         <div className="hidden mr-3 space-x-4 lg:flex nav__item">

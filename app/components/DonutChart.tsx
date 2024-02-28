@@ -116,8 +116,6 @@ const CryptoPieChart: React.FC<Props> = ({ assets }) => {
 
   const dataWithColors = data.map(addColorToCryptoItem);
 
-  console.log("pie data is ", data);
-  console.log("pie dataWithColors is ", dataWithColors);
   return (
     <>
       <h3>Pie chart</h3>

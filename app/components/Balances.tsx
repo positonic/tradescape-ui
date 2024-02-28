@@ -6,21 +6,18 @@ import DonutChart from "./DonutChart";
 //import BalanceHistory from "./BalanceHistory";
 import BalanceHistoryLineChart from "./BalanceHistoryLineChart";
 import { formatCurrency, colors } from "@/utils";
+import BalanceHistoryItem from "./BalanceHistoryItem";
+import FetchUpdate from "./FetchUpdate";
+import BalanceData from "./BalanceData";
+import { Select } from "@mantine/core";
 
-interface BalanceData {
-  timestamp: number;
-  balances: ExchangeBalance[];
-  totalBalance: number;
-}
-interface FetchUpdate {
-  balances: ExchangeBalance[];
-  totalBalance: number;
-  history: BalanceHistoryItem[];
-}
-interface BalanceHistoryItem {
-  timestamp: number;
-  totalBalance: number;
-}
+const exchangeSelectOptions = [
+  { value: "All", label: "All" },
+  { value: "Binance", label: "Binance" },
+  { value: "Bybit", label: "Bybit" },
+  { value: "Kraken", label: "Kraken" },
+];
+
 const balanceHistoryKey = "balanceHistory";
 const localStorageKey = "balancesData";
 const saveBalanceHistory = (newTotalBalance: number): BalanceHistoryItem[] => {
@@ -43,6 +40,7 @@ const saveBalanceHistory = (newTotalBalance: number): BalanceHistoryItem[] => {
   return history;
 };
 const fetchAndUpdateBalances = async (): Promise<FetchUpdate> => {
+  console.log("fetchAndUpdateBalances > Fetching new data", new Date());
   const storedDataJSON = localStorage.getItem(localStorageKey);
   const historyJSON = localStorage.getItem(balanceHistoryKey);
   const storedData: BalanceData | null = storedDataJSON
@@ -51,17 +49,38 @@ const fetchAndUpdateBalances = async (): Promise<FetchUpdate> => {
   const history: BalanceHistoryItem[] | null = historyJSON
     ? JSON.parse(historyJSON)
     : null;
-  const fifteenMinutesAgo = Date.now() - 15 * 60 * 1000;
+  const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
 
-  if (storedData && storedData.timestamp > fifteenMinutesAgo) {
-    console.log("Using cached data", storedData);
-    return {
-      balances: storedData.balances,
-      totalBalance: storedData.totalBalance,
-      history: history || [],
-    };
+  console.log(
+    "fetch > fiveMinutesAgo is ",
+    new Date(fiveMinutesAgo).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, // Set to true for AM/PM format
+    })
+  );
+  if (storedData) {
+    console.log(
+      "fetch: balances last saved at ",
+      storedData?.timestamp,
+      new Date(storedData?.timestamp).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false, // Set to true for AM/PM format
+      })
+    );
+    console.log("fetch: storedData?.timestamp is ", storedData?.timestamp);
+    console.log("fetch: fiveMinutesAgo is ", fiveMinutesAgo);
+    console.log(
+      "fetch: Last save is more than 5 minutes ago is ",
+      storedData?.timestamp < fiveMinutesAgo
+    );
   } else {
+    console.log("fetch: no storedData");
+  }
+  if (storedData && storedData.timestamp < fiveMinutesAgo) {
     try {
+      console.log("fetch: doing new fetch");
       const response = await fetch("/api/balances");
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -82,6 +101,13 @@ const fetchAndUpdateBalances = async (): Promise<FetchUpdate> => {
       console.error("Failed to fetch new data:", error);
       throw error;
     }
+  } else {
+    console.log("fetch: Using cached data", storedData);
+    return {
+      balances: storedData.balances,
+      totalBalance: storedData.totalBalance,
+      history: history || [],
+    };
   }
 };
 
@@ -92,20 +118,70 @@ const BalancesComponent: React.FC = () => {
   const [totalBalance, setTotalBalances] = useState<number>(0);
   const [history, setHistory] = useState<BalanceHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedExchange, setSelectedExchange] = useState<string>("All");
+  const [selectedCoin, setSelectedCoin] = useState<string>("All");
+  const [coins, setCoins] = useState<string>(["All"]);
+  const [firstLoad, setFirstLoad] = useState<boolean>(true);
 
-  useEffect(() => {
+  const fetchData = (postFetchCallback: { (): void; (): void } | undefined) => {
     fetchAndUpdateBalances()
       .then(({ balances, totalBalance, history }) => {
-        setBalances(balances);
+        console.log(
+          `fetch: fetchAndUpdateBalances filter for  ${selectedExchange}`
+        );
+        console.log(
+          `fetch: fetchAndUpdateBalances filter for selectedCoin ${selectedCoin}`
+        );
+        console.log("init useEffect");
+        console.log("firstLoad is ", firstLoad);
+        if (firstLoad) {
+          const balanceCoins: string[] =
+            balances?.map((balance) => balance.coin) || [];
+          console.log(
+            "init set coins",
+            coins.concat([...new Set(balanceCoins)])
+          );
+          setFirstLoad(false);
+          setCoins(coins.concat([...new Set(balanceCoins)]));
+        }
+
+        const filteredExchangeBalances =
+          selectedExchange === "All"
+            ? balances
+            : balances.filter(
+                (balance) => balance.exchange === selectedExchange
+              );
+        const filteredExchangeCoinBalances =
+          selectedCoin === "All"
+            ? filteredExchangeBalances
+            : filteredExchangeBalances.filter(
+                (balance) => balance.coin === selectedCoin
+              );
+
+        setBalances(filteredExchangeCoinBalances.sort());
         setTotalBalances(totalBalance);
         setHistory(history);
         setIsLoading(false);
+        if (postFetchCallback) {
+          postFetchCallback();
+        }
       })
       .catch((error) => {
         console.error("Error fetching balances:", error);
         setIsLoading(false);
       });
-  }, []);
+  };
+
+  useEffect(() => {
+    // Fetch data immediately upon component mount
+    fetchData(undefined);
+
+    // Set up polling every 5 minutes
+    const intervalId = setInterval(() => fetchData(undefined), 5 * 60 * 1000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [selectedExchange, selectedCoin]);
 
   if (isLoading) {
     return (
@@ -114,8 +190,16 @@ const BalancesComponent: React.FC = () => {
       </div>
     );
   }
-  console.log("balances are", balances);
-  console.log("history are", history);
+  function onChange(value: string | null) {
+    if (!value) throw Error("Exchange select value should not be null");
+    setSelectedExchange(value);
+  }
+  function onChangeCoin(value: string | null) {
+    console.log("onChangeCoin value is ", value);
+    if (!value) throw Error("Coin select value should not be null");
+    setSelectedCoin(value);
+  }
+
   return (
     <div className="p-4">
       <div className="flex justify-end">
@@ -134,6 +218,27 @@ const BalancesComponent: React.FC = () => {
       </div>
       <div>
         <h2>Balances per Exchange</h2>
+        <div className="flex">
+          <div className="w-[400px] p-4 text-white">
+            <Select
+              label="Select coin"
+              placeholder="Select exchange"
+              onChange={onChangeCoin}
+              data={coins}
+              searchable
+            />
+          </div>
+          <div className="flex-grow p-4 text-white">
+            <Select
+              label="Select exchange"
+              placeholder="Select exchange"
+              onChange={onChange}
+              limit={5}
+              data={exchangeSelectOptions}
+            />
+          </div>
+        </div>
+
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -141,19 +246,13 @@ const BalancesComponent: React.FC = () => {
                 Coin
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Free
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Used
+                Exchange
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Total
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 $USD Value
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Exchange
               </th>
             </tr>
           </thead>
@@ -176,19 +275,13 @@ const BalancesComponent: React.FC = () => {
                           <span className="inline-block">{coin}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {free}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {used}
+                          {exchange}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {total}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          ${usdValue.toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {exchange}
+                          {formatCurrency(usdValue)}
                         </td>
                       </tr>
                     );

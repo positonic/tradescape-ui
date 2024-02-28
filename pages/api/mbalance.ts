@@ -80,9 +80,10 @@ export default async function handler(
 
   // Define an array of exchanges with their respective names and instances
   const exchanges: Exchange[] = [
-    { name: "Kraken", instance: kraken, fetchConfig: {} },
-    { name: "Bybit", instance: bybit, fetchConfig: { type: "spot" } },
-    { name: "Binance", instance: binance, fetchConfig: {} },
+    { name: "Kraken", instance: kraken, fetchConfig: { type: "margin" } },
+    // ,
+    // { name: "Bybit", instance: bybit, fetchConfig: { type: "spot" } },
+    // { name: "Binance", instance: binance, fetchConfig: {} },
   ];
 
   let portfolioTotalUsdValue = 0;
@@ -104,6 +105,7 @@ export default async function handler(
           type: "margin",
         });
         console.log("marginBalance", marginBalance);
+        res.status(200).json({ balances: marginBalance, error: "" });
       }
       // Accumulate the total USD value from all exchanges
       portfolioTotalUsdValue += totalUsdValue;
