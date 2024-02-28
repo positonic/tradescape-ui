@@ -1,15 +1,13 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Loader } from "@mantine/core";
-import ExchangeBalance from "@/interfaces/ExchangeBalance";
-import DonutChart from "./DonutChart";
-//import BalanceHistory from "./BalanceHistory";
 import BalanceHistoryLineChart from "./BalanceHistoryLineChart";
-import { formatCurrency, colors } from "@/utils";
+import ExchangeBalance from "@/interfaces/ExchangeBalance";
 import BalanceHistoryItem from "./BalanceHistoryItem";
+import { formatCurrency, colors } from "@/utils";
+import { Loader, Select } from "@mantine/core";
+import { useState, useEffect } from "react";
 import FetchUpdate from "./FetchUpdate";
 import BalanceData from "./BalanceData";
-import { Select } from "@mantine/core";
+import DonutChart from "./DonutChart";
 
 const exchangeSelectOptions = [
   { value: "All", label: "All" },
@@ -49,7 +47,7 @@ const fetchAndUpdateBalances = async (): Promise<FetchUpdate> => {
   const history: BalanceHistoryItem[] | null = historyJSON
     ? JSON.parse(historyJSON)
     : null;
-  const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+  const fiveMinutesAgo = Date.now() - 10 * 60 * 1000;
 
   console.log(
     "fetch > fiveMinutesAgo is ",

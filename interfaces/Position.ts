@@ -1,11 +1,13 @@
+import { AggregatedOrder } from "@/Exchange";
+
 export default interface Position {
   Date: string;
-  ProfitLoss: number | null;
+  ProfitLoss: number;
   Duration: string;
   PositionType: "long" | "short";
   AverageEntryPrice: number;
   AverageExitPrice: number;
-  TotalCostBuy: number | null;
-  TotalCostSell: number | null;
-  Orders: any[];
+  TotalCostBuy: number;
+  TotalCostSell: number;
+  Orders: AggregatedOrder[];
 }

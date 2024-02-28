@@ -1,4 +1,8 @@
-import { Exchange as CCXTExchange, Trade } from "ccxt"; // renaming Exchange from ccxt to CCXTExchange to avoid naming conflict
+import {
+  Exchange as CCXTExchange,
+  Trade,
+  Position as CCxtPosition,
+} from "ccxt"; // renaming Exchange from ccxt to CCXTExchange to avoid naming conflict
 
 const VOLUME_THRESHOLD_PERCENT = 3;
 interface CCxtTrade extends Trade {
@@ -614,6 +618,28 @@ export default class Exchange {
     });
   }
 
+  async fetchOpenPositions(markets?: string[]): Promise<any> {
+    try {
+      const positions: CCxtPosition[] = await this.client.fetchPositions(
+        ["BTC/USDT"],
+        {}
+      );
+      console.log("fetchOpenPositions: positions", positions);
+      return positions;
+    } catch (error) {
+      console.warn(`Error fetching trades from ${this.client.name}:`, error);
+      return {} as FetchTradesReturnType; // Return an empty Record<string, NormalizedTrade>
+    }
+  }
+
+  /**
+   * Fetch orders and create positions from them
+   * @param market
+   * @param exchangeName
+   * @param since
+   * @param limit
+   * @returns
+   */
   async fetchPositions(
     market: string,
     exchangeName: string,
@@ -1369,3 +1395,10 @@ export default class Exchange {
 // ];
 // const ethPositions = createPositionsFromOrders(ethOrdersThisYear, "binance");
 // console.log("arbPositions", ethPositions);
+
+export type ExchangeName = "kraken" | "binance";
+
+// Utility type guard to check if a string is a valid ExchangeName
+export function isExchangeName(value: string): value is ExchangeName {
+  return ["binance", "kraken"].includes(value);
+}
