@@ -4,27 +4,6 @@ import ccxt from "ccxt";
 import { parseExchangePair } from "@/utils";
 import { AggregatedOrder, aggregateTrades } from "@/Exchange";
 
-const sortDescending = (a: NormalizedTrade, b: NormalizedTrade) =>
-  b.time - a.time;
-const sortAscending = (a: NormalizedTrade, b: NormalizedTrade) =>
-  a.time - b.time;
-
-export interface NormalizedTrade {
-  id: string;
-  ordertxid: string;
-  pair: string;
-  time: number;
-  type: string;
-  ordertype: string;
-  price: string;
-  cost: string;
-  fee: string;
-  vol: number;
-  margin: string;
-  leverage: string;
-  misc: string;
-  exchange: string;
-}
 // Define the interface for the Trade array
 export type FetchTradesReturnType = Record<string, NormalizedTrade>;
 interface ApiKeys {
@@ -69,6 +48,7 @@ const apiKeys: ApiKeys = {
   },
 };
 import Exchange from "@/Exchange";
+import NormalizedTrade from "@/interfaces/NormalizedTrade";
 type ExchangeName = "kraken" | "binance";
 // Utility type guard to check if a string is a valid ExchangeName
 function isExchangeName(value: string): value is ExchangeName {

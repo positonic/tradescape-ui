@@ -1,43 +1,17 @@
 // pages/api/candles.js
 import type { NextApiRequest, NextApiResponse } from "next";
-import ccxt from "ccxt";
-import { parseExchangePair } from "@/utils";
-import { AggregatedOrder, aggregateTrades } from "@/Exchange";
+import Exchange, {
+  AggregatedOrder,
+  IExchange,
+  aggregateTrades,
+  initExchanges,
+  isExchangeName,
+} from "@/Exchange";
 
-const sortDescending = (a: NormalizedTrade, b: NormalizedTrade) =>
-  b.time - a.time;
-const sortAscending = (a: NormalizedTrade, b: NormalizedTrade) =>
-  a.time - b.time;
+import { sortDescending, sortAscending } from "@/utils";
 
-export interface NormalizedTrade {
-  id: string;
-  ordertxid: string;
-  pair: string;
-  time: number;
-  type: string;
-  ordertype: string;
-  price: string;
-  cost: string;
-  fee: string;
-  vol: number;
-  margin: string;
-  leverage: string;
-  misc: string;
-  exchange: string;
-}
 // Define the interface for the Trade array
 export type FetchTradesReturnType = Record<string, NormalizedTrade>;
-interface ApiKeys {
-  [key: string]: ApiKey;
-}
-interface ApiKeys {
-  kraken: ApiKey;
-  binance: ApiKey;
-}
-interface ApiKey {
-  apiKey: string;
-  apiSecret: string;
-}
 
 interface Position {
   Date: string;
@@ -53,67 +27,50 @@ interface Position {
 
 type ResponseData = {
   trades: NormalizedTrade[];
-  orders: AggregatedOrder[];
-  positions: Position[];
+  // orders: AggregatedOrder[];
+  // positions: Position[];
   error: string;
 };
 
-const apiKeys: ApiKeys = {
-  kraken: {
-    apiKey: process.env.KRAKEN_API_KEY as string,
-    apiSecret: process.env.KRAKEN_API_SECRET as string,
-  },
-  binance: {
-    apiKey: process.env.BINANCE_API_KEY as string,
-    apiSecret: process.env.BINANCE_API_SECRET as string,
-  },
-};
-import Exchange from "@/Exchange";
-type ExchangeName = "kraken" | "binance";
-// Utility type guard to check if a string is a valid ExchangeName
-function isExchangeName(value: string): value is ExchangeName {
-  return ["binance", "kraken"].includes(value);
-}
+import { TradeManager, getExchangeConfig } from "@/TradeManager";
+import { ExchangeConfig } from "@/interfaces/ExchangeConfig";
+import NormalizedTrade from "@/interfaces/NormalizedTrade";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
   //http://localhost:3000/api/trades?exchangeId=binance&since=null
+
+  const pair = "BTC/USDT";
+  const market = req.query.market;
   const since = req.query.since ? Number(req.query.since) : undefined;
   // Attempt to retrieve exchangeId from the query, with a fallback
-  const exchangeIdRaw = req.query.exchangeId;
-  const market = req.query.market;
-  const pair = "BTC/USDT";
-  //const { pair } = parseExchangePair(market as string);
-  // Ensure exchangeId is a string and matches ExchangeName; otherwise, handle the error
-  if (typeof exchangeIdRaw !== "string" || !isExchangeName(exchangeIdRaw)) {
+  const exchangeIdRaw: string | string[] | undefined = req.query.exchangeId;
+  const exchangeId: string | undefined = Array.isArray(exchangeIdRaw)
+    ? exchangeIdRaw[0]
+    : exchangeIdRaw;
+
+  if (exchangeId && !isExchangeName(exchangeId)) {
     return res
       .status(400)
       .json({ trades: [], error: "Invalid or missing exchangeId" });
   }
 
-  const exchangeId: ExchangeName = exchangeIdRaw;
+  let config: ExchangeConfig[] = getExchangeConfig(exchangeId);
 
-  const exchange = new Exchange(
-    ccxt,
-    apiKeys[exchangeId].apiKey,
-    apiKeys[exchangeId].apiSecret,
-    "binance"
-  );
+  const exchanges: Record<string, Exchange> = initExchanges();
+  console.log("exchanges is ", exchanges);
+  const tradeManager = new TradeManager(config, exchanges);
 
   try {
-    console.log("fetching trades for ", pair, since);
-    const exchangeTrades: FetchTradesReturnType = await exchange.fetchTrades(
-      pair,
-      since
-    );
-    const trades: NormalizedTrade[] =
-      Object.values(exchangeTrades).sort(sortAscending);
+    const trades: NormalizedTrade[] = await tradeManager.getAllTrades(since);
+    console.log("trades is ", trades);
+
     const orders: AggregatedOrder[] =
       aggregateTrades(trades).sort(sortDescending);
-    // Assuming the API response structure matches what you're expecting
-    // Example usage:
+
+    console.log("orders is ", orders);
 
     const positions = matchOrdersToPositions(orders);
 

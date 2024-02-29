@@ -80,6 +80,9 @@ export default function Positions({ positions }: PositionsProps) {
                 Date
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Coin
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 P/L
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -112,6 +115,9 @@ export default function Positions({ positions }: PositionsProps) {
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(position.Date).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {position.Orders[0].pair}
                   </td>
                   <td
                     className={`px-6 py-4 whitespace-nowrap text-sm ${

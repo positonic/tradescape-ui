@@ -1,3 +1,5 @@
+import NormalizedTrade from "./interfaces/NormalizedTrade";
+
 export function formatDateTime(timestamp: number): string {
   const date = new Date(timestamp);
 
@@ -82,3 +84,17 @@ export const colors = {
   USDT: "rgb(7, 193, 96)",
   USDC: "rgb(255, 255, 255)",
 };
+
+export const sortDescending = (a: any, b: any) => b.time - a.time;
+export const sortAscending = (a: any, b: any) => a.time - b.time;
+
+/**
+ *
+ * @returns a timestamp representing the start of the current day in my timezone
+ */
+export function getStartOfDayTimestamp(): number {
+  const now = new Date(); // Get the current date and time
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Set time to 00:00:00.000
+  const timestamp = startOfDay.getTime(); // Get the timestamp in milliseconds since the Unix Epoch
+  return timestamp;
+}

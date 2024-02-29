@@ -158,7 +158,7 @@ const BalancesComponent: React.FC = () => {
             : filteredExchangeBalances.filter(
                 (balance) => balance.coin === selectedCoin
               );
-        console.log("hideStables is ", hideStables);
+
         const filteredStables = hideStables
           ? filteredExchangeCoinBalances.filter(
               (balance) =>
@@ -208,7 +208,9 @@ const BalancesComponent: React.FC = () => {
     if (!value) throw Error("Coin select value should not be null");
     setSelectedCoin(value);
   }
-
+  const balanceTotal = balances
+    ? balances.reduce((accumulator, item) => accumulator + item.usdValue, 0)
+    : 0;
   return (
     <div className="p-4">
       <div className="flex justify-end">
@@ -227,8 +229,12 @@ const BalancesComponent: React.FC = () => {
       </div>
       <div>
         <h2>Balances per Exchange</h2>
-
-        <OpenOrders />
+        <div className="flex justify-end">
+          <span className="text-3xl font-semibold">
+            {formatCurrency(balanceTotal)}({" "}
+            {Math.round((balanceTotal / totalBalance) * 100)})%
+          </span>
+        </div>
         <div className="flex">
           <div className="w-[400px] p-4 text-white">
             <Select
@@ -310,6 +316,7 @@ const BalancesComponent: React.FC = () => {
           </tbody>
         </table>
       </div>
+      <OpenOrders />
     </div>
   );
 };

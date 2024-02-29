@@ -1,8 +1,10 @@
-import {
+import ccxt, {
   Exchange as CCXTExchange,
   Trade,
   Position as CCxtPosition,
 } from "ccxt"; // renaming Exchange from ccxt to CCXTExchange to avoid naming conflict
+
+import { apiKeys } from "@/ApiKeys";
 
 const VOLUME_THRESHOLD_PERCENT = 3;
 interface CCxtTrade extends Trade {
@@ -587,7 +589,15 @@ export function createPositionsFromOrders(
 
 //   return positions;
 // }
-export default class Exchange {
+export interface IExchange {
+  fetchPositions(markets?: string[]): Promise<any>;
+  fetchOpenOrders(market?: string): Promise<any>;
+  fetchOrders(market: string, since?: number, limit?: number): Promise<any>;
+  fetchMyTrades(market?: string, since?: number, limit?: number): Promise<any>;
+  loadMarkets(): Promise<any>;
+  name: string;
+}
+export default class Exchange implements IExchange {
   protected client: CCXTExchange;
 
   constructor(
@@ -711,7 +721,7 @@ export default class Exchange {
     }
   }
   async fetchTrades(
-    market: string,
+    market: string | undefined,
     since: number | undefined = undefined,
     limit: number = 1000
   ): Promise<FetchTradesReturnType> {
@@ -721,7 +731,7 @@ export default class Exchange {
       const rawTrades = await this.client.fetchMyTrades(
         market,
         since ? since : undefined,
-        limit
+        undefined
       );
       const sortedTrades = rawTrades.sort((a, b) => b.timestamp - a.timestamp);
       const normalizedTrades = sortedTrades.map(
@@ -1411,4 +1421,16 @@ export type ExchangeName = "kraken" | "binance";
 // Utility type guard to check if a string is a valid ExchangeName
 export function isExchangeName(value: string): value is ExchangeName {
   return ["binance", "kraken"].includes(value);
+}
+
+export function initExchanges() {
+  return Object.keys(apiKeys).reduce((acc, name) => {
+    acc[name] = new Exchange(
+      ccxt,
+      apiKeys[name].apiKey,
+      apiKeys[name].apiSecret,
+      name
+    );
+    return acc;
+  }, {} as Record<string, Exchange>);
 }
