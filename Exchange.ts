@@ -621,11 +621,21 @@ export default class Exchange {
   async fetchOpenPositions(markets?: string[]): Promise<any> {
     try {
       const positions: CCxtPosition[] = await this.client.fetchPositions(
-        ["BTC/USDT"],
+        markets,
         {}
       );
       console.log("fetchOpenPositions: positions", positions);
       return positions;
+    } catch (error) {
+      console.warn(`Error fetching trades from ${this.client.name}:`, error);
+      return {} as FetchTradesReturnType; // Return an empty Record<string, NormalizedTrade>
+    }
+  }
+  async fetchOpenOrders(market?: string): Promise<any> {
+    try {
+      const orders: any[] = await this.client.fetchOpenOrders(market);
+      console.log("fetchOpenPositions: orders", orders);
+      return orders;
     } catch (error) {
       console.warn(`Error fetching trades from ${this.client.name}:`, error);
       return {} as FetchTradesReturnType; // Return an empty Record<string, NormalizedTrade>

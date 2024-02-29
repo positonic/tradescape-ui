@@ -5,7 +5,7 @@ import Exchange, { ExchangeName, isExchangeName } from "@/Exchange";
 import ccxt from "ccxt";
 
 type ResponseData = {
-  positions: any[];
+  orders: any[];
   error: string;
 };
 
@@ -22,7 +22,7 @@ export default async function handler(
   if (typeof exchangeIdRaw !== "string" || !isExchangeName(exchangeIdRaw)) {
     return res
       .status(400)
-      .json({ positions: [], error: "Invalid or missing exchangeId" });
+      .json({ orders: [], error: "Invalid or missing exchangeId" });
   }
 
   const exchangeId: ExchangeName = exchangeIdRaw;
@@ -35,13 +35,12 @@ export default async function handler(
   );
 
   try {
-    console.log("fetching positions for ", pair, since);
-    const positions: any = await exchange.fetchOpenPositions(["BTC/USDT"]);
-
-    const response: ResponseData = { positions, error: "" };
+    const orders: any = await exchange.fetchOpenOrders();
+    console.log("IIIII", orders);
+    const response: ResponseData = { orders, error: "" };
     res.status(200).json(response);
   } catch (error) {
-    console.error("Failed to fetch candle data:", error);
-    res.status(500).json({ positions: [], error: "Failed to fetch TRADES" });
+    console.error("Failed to fetch open order data:", error);
+    res.status(500).json({ orders: [], error: "Failed to fetch open orders" });
   }
 }
