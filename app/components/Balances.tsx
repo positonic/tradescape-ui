@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import FetchUpdate from "./FetchUpdate";
 import BalanceData from "./BalanceData";
 import DonutChart from "./DonutChart";
+import OpenOrders from "./OpenOrders";
+import { Checkbox } from "@mantine/core";
 
 const exchangeSelectOptions = [
   { value: "All", label: "All" },
@@ -120,6 +122,7 @@ const BalancesComponent: React.FC = () => {
   const [selectedCoin, setSelectedCoin] = useState<string>("All");
   const [coins, setCoins] = useState<string>(["All"]);
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
+  const [hideStables, setHideStables] = useState(false);
 
   const fetchData = (postFetchCallback: { (): void; (): void } | undefined) => {
     fetchAndUpdateBalances()
@@ -155,8 +158,16 @@ const BalancesComponent: React.FC = () => {
             : filteredExchangeBalances.filter(
                 (balance) => balance.coin === selectedCoin
               );
-
-        setBalances(filteredExchangeCoinBalances.sort());
+        console.log("hideStables is ", hideStables);
+        const filteredStables = hideStables
+          ? filteredExchangeCoinBalances.filter(
+              (balance) =>
+                balance.coin !== "USDT" &&
+                balance.coin !== "USD" &&
+                balance.coin !== "USDC"
+            )
+          : filteredExchangeCoinBalances;
+        setBalances(filteredStables.sort());
         setTotalBalances(totalBalance);
         setHistory(history);
         setIsLoading(false);
@@ -179,7 +190,7 @@ const BalancesComponent: React.FC = () => {
 
     // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
-  }, [selectedExchange, selectedCoin]);
+  }, [selectedExchange, selectedCoin, hideStables]);
 
   if (isLoading) {
     return (
@@ -216,6 +227,8 @@ const BalancesComponent: React.FC = () => {
       </div>
       <div>
         <h2>Balances per Exchange</h2>
+
+        <OpenOrders />
         <div className="flex">
           <div className="w-[400px] p-4 text-white">
             <Select
@@ -224,6 +237,13 @@ const BalancesComponent: React.FC = () => {
               onChange={onChangeCoin}
               data={coins}
               searchable
+            />
+          </div>
+          <div className="flex-grow p-4 text-white">
+            <Checkbox
+              label="Hide stables"
+              checked={hideStables}
+              onChange={(event) => setHideStables(event.currentTarget.checked)}
             />
           </div>
           <div className="flex-grow p-4 text-white">
