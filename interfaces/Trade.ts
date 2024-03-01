@@ -3,7 +3,7 @@ export type Trade = {
   ordertxid: string;
   pair: string;
   time: number;
-  type: "buy" | "sell"; // Assuming type can be 'buy' or 'sell'
+  type: "buy" | "sell" | string; // Assuming type can be 'buy' or 'sell'
   ordertype: string;
   price: string;
   cost: string;
@@ -13,4 +13,5 @@ export type Trade = {
   leverage: string;
   misc: string;
   exchange: string;
+  date?: Date;
 };

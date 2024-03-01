@@ -1,13 +1,16 @@
 import ccxt, {
   Exchange as CCXTExchange,
-  Trade,
+  Trade as CCxtLibTrade,
   Position as CCxtPosition,
 } from "ccxt"; // renaming Exchange from ccxt to CCXTExchange to avoid naming conflict
 
 import { apiKeys } from "@/ApiKeys";
+import { Trade } from "./interfaces/Trade";
+import { Order } from "./interfaces/Order";
+import { ApiKeys } from "./interfaces/ApiKeys";
 
 const VOLUME_THRESHOLD_PERCENT = 3;
-interface CCxtTrade extends Trade {
+interface CCxtTrade extends CCxtLibTrade {
   margin?: string;
   leverage?: string;
   misc?: string;
@@ -27,45 +30,8 @@ interface CCxtTrade extends Trade {
 //   }
 // }
 
-// Defining the structure of a normalized trade
-export interface NormalizedTrade {
-  id: string;
-  ordertxid: string;
-  pair: string;
-  time: number;
-  type: string;
-  ordertype: string;
-  price: string;
-  cost: string;
-  fee: string;
-  vol: number;
-  margin: string;
-  leverage: string;
-  misc: string;
-  exchange: string;
-  date: Date;
-}
 // Define the interface for the Trade array
-export type FetchTradesReturnType = Record<string, NormalizedTrade>;
-
-// Interface for the aggregated order
-export interface AggregatedOrder {
-  ordertxid?: string;
-  time: number; // The time the trade position was opened
-  date: Date;
-  type: "buy" | "sell";
-  pair: string;
-  amount: number;
-  highestPrice: number;
-  lowestPrice: number;
-  averagePrice: number;
-  exchange: string;
-  trades: NormalizedTrade[]; // Add an array of trades
-  orderId?: string;
-  status?: string;
-  totalCost: number;
-  fee: number;
-}
+export type FetchTradesReturnType = Record<string, Trade>;
 
 export interface Position {
   time: number; // The time the trade position was opened
@@ -74,7 +40,7 @@ export interface Position {
   buyCost: number; // Total cost of buy orders
   sellCost: number; // Total cost of sell orders
   profitLoss: number; // Profit or loss from the position
-  orders: AggregatedOrder[]; // Array of orders that make up the position
+  orders: Order[]; // Array of orders that make up the position
   pair: string;
   exchange: string;
   price: number;
@@ -88,8 +54,8 @@ export interface Position {
  * @param trades
  * @returns
  */
-export function aggregateTrades(trades: NormalizedTrade[]): AggregatedOrder[] {
-  const ordersMap: { [ordertxid: string]: AggregatedOrder } = {};
+export function aggregateTrades(trades: Trade[]): Order[] {
+  const ordersMap: { [ordertxid: string]: Order } = {};
 
   trades.forEach((trade) => {
     const price = parseFloat(trade.price);
@@ -98,6 +64,8 @@ export function aggregateTrades(trades: NormalizedTrade[]): AggregatedOrder[] {
     if (!ordersMap[trade.ordertxid]) {
       // Initialize a new order with the current trade
       ordersMap[trade.ordertxid] = {
+        id: trade.id,
+        fee: Number(trade.fee),
         ordertxid: trade.ordertxid,
         time: trade.time,
         date: new Date(trade.time),
@@ -122,6 +90,8 @@ export function aggregateTrades(trades: NormalizedTrade[]): AggregatedOrder[] {
       // Update total cost and recalculate average price
       order.totalCost += price * vol;
       order.averagePrice = order.totalCost / order.amount;
+      order.id += "/" + trade.id;
+      order.fee = Number(trade.fee) + order.fee;
     }
   });
 
@@ -132,12 +102,15 @@ export function aggregateTrades(trades: NormalizedTrade[]): AggregatedOrder[] {
   });
 }
 
-export function mapToAggregatedOrders(data: any) {
-  const aggregatedOrders: AggregatedOrder[] = [];
+export function mapToOrders(data: any) {
+  const Orders: Order[] = [];
 
   data.forEach((order: any) => {
-    const aggregatedOrder: AggregatedOrder = {
+    const Order: Order = {
       orderId: order.id,
+      id: order.id,
+      totalCost: order.totalCost,
+      fee: order.fee,
       time: order.timestamp,
       date: new Date(order.datetime),
       type: order.side === "sell" ? "sell" : "buy",
@@ -151,14 +124,14 @@ export function mapToAggregatedOrders(data: any) {
       status: order.status,
     };
 
-    aggregatedOrders.push(aggregatedOrder);
+    Orders.push(Order);
   });
 
-  return aggregatedOrders;
+  return Orders;
 }
-export function aggregatePositions(orders: AggregatedOrder[]): Position[] {
+export function aggregatePositions(orders: Order[]): Position[] {
   // Group orders by pair
-  const ordersByPair: { [pair: string]: AggregatedOrder[] } = {};
+  const ordersByPair: { [pair: string]: Order[] } = {};
   orders.forEach((order) => {
     if (!ordersByPair[order.pair]) {
       ordersByPair[order.pair] = [];
@@ -176,9 +149,9 @@ export function aggregatePositions(orders: AggregatedOrder[]): Position[] {
       sellVolume = 0;
     let buyCost = 0,
       sellCost = 0;
-    let tempOrders: AggregatedOrder[] = [];
+    let tempOrders: Order[] = [];
 
-    ordersByPair[pair].forEach((order: AggregatedOrder) => {
+    ordersByPair[pair].forEach((order: Order) => {
       console.log("ordersByPair pair", pair);
       // Accumulate volumes and costs
       if (order.type === "buy") {
@@ -240,16 +213,16 @@ export function aggregatePositions(orders: AggregatedOrder[]): Position[] {
 
   return positions;
 }
-// function createPositionsFromOrdersOLD(orders: AggregatedOrder[]) {
+// function createPositionsFromOrdersOLD(orders: Order[]) {
 //   let positions: Position[] = [];
 
 //   let buyVolume = 0,
 //     sellVolume = 0;
 //   let buyCost = 0,
 //     sellCost = 0;
-//   let tempOrders: AggregatedOrder[] = [];
+//   let tempOrders: Order[] = [];
 
-//   orders.forEach((order: AggregatedOrder) => {
+//   orders.forEach((order: Order) => {
 //     // Accumulate volumes and costs
 //     if (order.type === "buy") {
 //       buyVolume += order.amount;
@@ -343,7 +316,7 @@ function isVolumeDifferenceWithinThreshold(
 }
 
 export function createPositionsFromOrders(
-  orders: AggregatedOrder[],
+  orders: Order[],
   exchangeName: string
 ): Position[] {
   console.log("createPositionsFromOrders");
@@ -353,9 +326,9 @@ export function createPositionsFromOrders(
   let positionCost = 0;
   let positionBuyCost = 0;
   let positionSellCost = 0;
-  let tempOrders: AggregatedOrder[] = [];
+  let tempOrders: Order[] = [];
 
-  orders.forEach((order: AggregatedOrder) => {
+  orders.forEach((order: Order) => {
     tempOrders.push(order);
     if (positionCost === 0) {
       console.log("____________________________________________________ ");
@@ -474,7 +447,7 @@ export function createPositionsFromOrders(
  * New version using orders from the exchange, not the orders I created
  */
 // function createPositionsFromOrdersOld(
-//   orders: AggregatedOrder[],
+//   orders: Order[],
 //   exchangeName: string
 // ) {
 //   let positions: Position[] = [];
@@ -484,10 +457,10 @@ export function createPositionsFromOrders(
 //     sellVolume = 0;
 //   let buyCost = 0,
 //     sellCost = 0;
-//   let tempOrders: AggregatedOrder[] = [];
+//   let tempOrders: Order[] = [];
 
 //   orders.forEach(
-//     (order: AggregatedOrder, currentIndex: number, ordersArray: any) => {
+//     (order: Order, currentIndex: number, ordersArray: any) => {
 //       // Accumulate volumes and costs
 //       if (order.type === "buy") {
 //         buyVolume += order.amount;
@@ -589,15 +562,7 @@ export function createPositionsFromOrders(
 
 //   return positions;
 // }
-export interface IExchange {
-  fetchPositions(markets?: string[]): Promise<any>;
-  fetchOpenOrders(market?: string): Promise<any>;
-  fetchOrders(market: string, since?: number, limit?: number): Promise<any>;
-  fetchMyTrades(market?: string, since?: number, limit?: number): Promise<any>;
-  loadMarkets(): Promise<any>;
-  name: string;
-}
-export default class Exchange implements IExchange {
+export default class Exchange {
   protected client: CCXTExchange;
 
   constructor(
@@ -638,7 +603,7 @@ export default class Exchange implements IExchange {
       return positions;
     } catch (error) {
       console.warn(`Error fetching trades from ${this.client.name}:`, error);
-      return {} as FetchTradesReturnType; // Return an empty Record<string, NormalizedTrade>
+      return {} as FetchTradesReturnType; // Return an empty Record<string, Trade>
     }
   }
   async fetchOpenOrders(market?: string): Promise<any> {
@@ -648,7 +613,7 @@ export default class Exchange implements IExchange {
       return orders;
     } catch (error) {
       console.warn(`Error fetching trades from ${this.client.name}:`, error);
-      return {} as FetchTradesReturnType; // Return an empty Record<string, NormalizedTrade>
+      return {} as FetchTradesReturnType; // Return an empty Record<string, Trade>
     }
   }
 
@@ -677,7 +642,7 @@ export default class Exchange implements IExchange {
       return positions;
     } catch (error) {
       console.warn(`Error fetching trades from ${this.client.name}:`, error);
-      return {} as FetchTradesReturnType; // Return an empty Record<string, NormalizedTrade>
+      return {} as FetchTradesReturnType; // Return an empty Record<string, Trade>
     }
   }
 
@@ -685,7 +650,7 @@ export default class Exchange implements IExchange {
     market: string,
     since: number | undefined = undefined,
     limit: number = 1000
-  ): Promise<AggregatedOrder[]> {
+  ): Promise<Order[]> {
     try {
       if (since) console.log("Call fetchTrades since ", new Date(since));
       const rawOrders = await this.client.fetchOrders(
@@ -710,13 +675,13 @@ export default class Exchange implements IExchange {
        */
       //console.log("rawTrades", rawOrders);
       //Only allow closed orders for now
-      const orders = mapToAggregatedOrders(rawOrders).filter(
+      const orders = mapToOrders(rawOrders).filter(
         (order) => order.status === "closed"
       );
       return orders;
     } catch (error) {
       console.warn(`Error fetching trades from ${this.client.name}:`, error);
-      const orders: AggregatedOrder[] = [];
+      const orders: Order[] = [];
       return orders;
     }
   }
@@ -733,33 +698,33 @@ export default class Exchange implements IExchange {
         since ? since : undefined,
         undefined
       );
-      const sortedTrades = rawTrades.sort((a, b) => b.timestamp - a.timestamp);
-      const normalizedTrades = sortedTrades.map(
-        (trade: CCxtTrade): [string, NormalizedTrade] => {
-          const normalizedTrade: NormalizedTrade = {
-            id: trade.id?.toString() ?? "",
-            ordertxid: trade.order?.toString() ?? "",
-            pair: trade.symbol ?? "",
-            time: Number(trade.timestamp),
-            type: trade.side,
-            ordertype: String(trade.type),
-            price: trade.price.toString(),
-            cost: (trade.cost ?? 0).toString(),
-            fee: trade.fee?.cost?.toString() ?? "0",
-            vol: Number(trade.amount),
-            margin: trade.margin ?? "",
-            leverage: trade.leverage ?? "",
-            misc: trade.misc ?? "",
-            exchange: this.client.name,
-            date: new Date(Number(trade.timestamp)),
-          };
-          return [normalizedTrade.id, normalizedTrade]; // Ensure the key is a string
-        }
+      const sortedTrades = rawTrades.sort(
+        (a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0)
       );
-      return Object.fromEntries(normalizedTrades);
+      const Trades = sortedTrades.map((trade: CCxtTrade): [string, Trade] => {
+        const Trade: Trade = {
+          id: trade.id?.toString() ?? "",
+          ordertxid: trade.order?.toString() ?? "",
+          pair: trade.symbol ?? "",
+          time: Number(trade.timestamp),
+          type: trade.side,
+          ordertype: String(trade.type),
+          price: trade.price.toString(),
+          cost: (trade.cost ?? 0).toString(),
+          fee: trade.fee?.cost?.toString() ?? "0",
+          vol: Number(trade.amount),
+          margin: trade.margin ?? "",
+          leverage: trade.leverage ?? "",
+          misc: trade.misc ?? "",
+          exchange: this.client.name,
+          date: new Date(Number(trade.timestamp)),
+        };
+        return [Trade.id, Trade]; // Ensure the key is a string
+      });
+      return Object.fromEntries(Trades);
     } catch (error) {
       console.warn(`Error fetching trades from ${this.client.name}:`, error);
-      return {} as FetchTradesReturnType; // Return an empty Record<string, NormalizedTrade>
+      return {} as FetchTradesReturnType; // Return an empty Record<string, Trade>
     }
   }
   async fetchAllTrades(
@@ -780,10 +745,10 @@ export default class Exchange implements IExchange {
         break;
       }
       for (const trade of Object.values(trades)) {
-        // Assuming each trade has a unique ID and can be normalized to the NormalizedTrade structure
+        // Assuming each trade has a unique ID and can be normalized to the Trade structure
         allTrades[trade.id] = trade;
       }
-      const lastTrade: NormalizedTrade =
+      const lastTrade: Trade =
         Object.values(trades)[Object.values(trades).length - 1];
       since = lastTrade.time + 1;
     }
@@ -826,7 +791,7 @@ export default class Exchange implements IExchange {
   }
 }
 
-// const ethOrders: AggregatedOrder[] = [
+// const ethOrders: Order[] = [
 //   {
 //     orderId: "23126688",
 //     time: 1517560885727,
@@ -1305,7 +1270,7 @@ export default class Exchange implements IExchange {
 //   },
 // ];
 
-// const arbOrders: AggregatedOrder[] = [
+// const arbOrders: Order[] = [
 //   {
 //     orderId: "930500823",
 //     time: 1705310656789,
@@ -1349,7 +1314,7 @@ export default class Exchange implements IExchange {
 //     status: "closed",
 //   },
 // ];
-// const arbOrders: AggregatedOrder[] = [
+// const arbOrders: Order[] = [
 //   {
 //     orderId: "930500823",
 //     time: 1705310656789,
@@ -1383,7 +1348,7 @@ export default class Exchange implements IExchange {
 // const ethPositions = createPositionsFromOrders(ethOrders, "binance");
 
 // logArrayAndNestedOrders("> arbPositions", ethPositions);
-// const ethOrdersThisYear: AggregatedOrder[] = [
+// const ethOrdersThisYear: Order[] = [
 //   {
 //     orderId: "15487634545",
 //     time: 1704908191971,
@@ -1425,10 +1390,13 @@ export function isExchangeName(value: string): value is ExchangeName {
 
 export function initExchanges() {
   return Object.keys(apiKeys).reduce((acc, name) => {
+    const key = name as keyof ApiKeys; // Assert that name is indeed a key of ApiKeys
+    const apiKeyData = apiKeys[key]; // Now TypeScript knows apiKeyData must be of type ApiKey
+
     acc[name] = new Exchange(
       ccxt,
-      apiKeys[name].apiKey,
-      apiKeys[name].apiSecret,
+      apiKeyData.apiKey, // Add index signature to ApiKeys type
+      apiKeyData.apiSecret, // Add index signature to ApiKeys type
       name
     );
     return acc;

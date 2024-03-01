@@ -1,4 +1,4 @@
-import { AggregatedOrder } from "@/Exchange";
+import { Order } from "./Order";
 
 export default interface Position {
   Date: string;
@@ -9,5 +9,5 @@ export default interface Position {
   AverageExitPrice: number;
   TotalCostBuy: number;
   TotalCostSell: number;
-  Orders: AggregatedOrder[];
+  Orders: Order[];
 }

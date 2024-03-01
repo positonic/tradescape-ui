@@ -1,4 +1,4 @@
-import Exchange, { ExchangeName } from "./Exchange";
+import Exchange, { ExchangeName, FetchTradesReturnType } from "./Exchange";
 import { ApiKeys } from "./interfaces/ApiKeys";
 import { ExchangeConfig } from "./interfaces/ExchangeConfig";
 import { apiKeys } from "./ApiKeys";
@@ -54,26 +54,39 @@ export function getExchangeConfig(exchangeId: string | string[] | undefined) {
 }
 export class TradeManager {
   allTrades: any = [];
-  exchanges: Exchange[];
+  exchanges: Record<string, Exchange>;
   config: ExchangeConfig[];
 
-  constructor(config: ExchangeConfig[], exchanges: Exchange[] = []) {
+  constructor(config: ExchangeConfig[], exchanges: Record<string, Exchange>) {
     this.config = config;
     this.exchanges = exchanges;
   }
 
   /**
+   * This specific markets for the exchanges that the class was set up for
+   */
+  async getMarketTrades(market: string, lastTimestamp: number | undefined) {
+    return this.getAllTrades([market], lastTimestamp);
+  }
+  /**
    * This gets all markets, all trades based on the config it's given
    */
-  async getAllTrades(lastTimestamp: number | undefined) {
+  async getAllTrades(
+    pairs: string[] | undefined,
+    lastTimestamp: number | undefined
+  ) {
     console.log("lastTimestamp is:", lastTimestamp);
     const since = lastTimestamp ? lastTimestamp : undefined; // Fetch trades after the last recorded trade
 
-    for (const { exchange: exchangeName, pairs } of this.config) {
+    for (const { exchange: exchangeName, pairs: exchangePairs } of this
+      .config) {
       const exchange = this.exchanges[exchangeName];
       if (!exchange) continue; // Skip if the exchange is not initialized
 
-      for (const pair of pairs) {
+      // If pairs are provided, use them; otherwise, use the pairs for the exchange from the config
+      const marketPairs = pairs ? pairs : exchangePairs;
+
+      for (const pair of marketPairs) {
         try {
           const exchangeTrades: FetchTradesReturnType =
             await exchange.fetchTrades(pair, since);

@@ -1,22 +1,15 @@
 // pages/api/candles.js
 import type { NextApiRequest, NextApiResponse } from "next";
-import ccxt from "ccxt";
-import { parseExchangePair } from "@/utils";
-import { AggregatedOrder, aggregateTrades } from "@/Exchange";
+import Exchange, {
+  initExchanges,
+  isExchangeName,
+  aggregateTrades,
+} from "@/Exchange";
+
+import { sortDescending, sortAscending, parseExchangePair } from "@/utils";
 
 // Define the interface for the Trade array
-export type FetchTradesReturnType = Record<string, NormalizedTrade>;
-interface ApiKeys {
-  [key: string]: ApiKey;
-}
-interface ApiKeys {
-  kraken: ApiKey;
-  binance: ApiKey;
-}
-interface ApiKey {
-  apiKey: string;
-  apiSecret: string;
-}
+export type FetchTradesReturnType = Record<string, Trade>;
 
 interface Position {
   Date: string;
@@ -27,72 +20,64 @@ interface Position {
   AverageExitPrice: number;
   TotalCostBuy: number;
   TotalCostSell: number;
-  Orders: AggregatedOrder[];
+  Orders: Order[];
 }
 
 type ResponseData = {
-  trades: NormalizedTrade[];
-  orders: AggregatedOrder[];
+  trades: Trade[];
+  orders: Order[];
   positions: Position[];
   error: string;
 };
 
-const apiKeys: ApiKeys = {
-  kraken: {
-    apiKey: process.env.KRAKEN_API_KEY as string,
-    apiSecret: process.env.KRAKEN_API_SECRET as string,
-  },
-  binance: {
-    apiKey: process.env.BINANCE_API_KEY as string,
-    apiSecret: process.env.BINANCE_API_SECRET as string,
-  },
-};
-import Exchange from "@/Exchange";
-import NormalizedTrade from "@/interfaces/NormalizedTrade";
-type ExchangeName = "kraken" | "binance";
-// Utility type guard to check if a string is a valid ExchangeName
-function isExchangeName(value: string): value is ExchangeName {
-  return ["binance", "kraken"].includes(value);
-}
+import { TradeManager, getExchangeConfig } from "@/TradeManager";
+import { ExchangeConfig } from "@/interfaces/ExchangeConfig";
+import { Trade } from "@/interfaces/Trade";
+import { Order } from "@/interfaces/Order";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
+  //http://localhost:3000/api/trades?exchangeId=binance&since=null
+
+  //const pair = "BTC/USDT";
+  const market = req.query.market;
+  const { pair } = parseExchangePair(market as string);
+
   const since = req.query.since ? Number(req.query.since) : undefined;
   // Attempt to retrieve exchangeId from the query, with a fallback
-  const exchangeIdRaw = req.query.exchangeId;
-  const market = req.query.market;
-  //const pair = "BTC/USDT";
-  const { pair } = parseExchangePair(market as string);
-  // Ensure exchangeId is a string and matches ExchangeName; otherwise, handle the error
-  if (typeof exchangeIdRaw !== "string" || !isExchangeName(exchangeIdRaw)) {
-    return res
-      .status(400)
-      .json({ trades: [], error: "Invalid or missing exchangeId" });
+  const exchangeIdRaw: string | string[] | undefined = req.query.exchangeId;
+  const exchangeId: string | undefined = Array.isArray(exchangeIdRaw)
+    ? exchangeIdRaw[0]
+    : exchangeIdRaw;
+
+  if (exchangeId && !isExchangeName(exchangeId)) {
+    return res.status(400).json({
+      trades: [],
+      orders: [],
+      positions: [],
+      error: "Invalid or missing exchangeId",
+    });
   }
 
-  const exchangeId: ExchangeName = exchangeIdRaw;
+  const config: ExchangeConfig[] = getExchangeConfig(exchangeId);
 
-  const exchange = new Exchange(
-    ccxt,
-    apiKeys[exchangeId].apiKey,
-    apiKeys[exchangeId].apiSecret,
-    "binance"
-  );
+  const exchanges: Record<string, Exchange> = initExchanges();
+  console.log("exchanges is ", exchanges);
+  const tradeManager = new TradeManager(config, exchanges);
 
+  let trades: Trade[] = [];
+
+  const pairs = pair ? [pair] : undefined;
   try {
-    console.log("fetching trades for ", pair, since);
-    const exchangeTrades: FetchTradesReturnType = await exchange.fetchTrades(
-      pair,
-      since
-    );
-    const trades: NormalizedTrade[] =
-      Object.values(exchangeTrades).sort(sortAscending);
-    const orders: AggregatedOrder[] =
-      aggregateTrades(trades).sort(sortDescending);
-    // Assuming the API response structure matches what you're expecting
-    // Example usage:
+    trades = await tradeManager.getAllTrades(pairs, since);
+
+    console.log("trades is ", trades);
+
+    const orders: Order[] = aggregateTrades(trades).sort(sortDescending);
+
+    console.log("orders is ", orders);
 
     const positions = matchOrdersToPositions(orders);
 
@@ -100,7 +85,12 @@ export default async function handler(
     res.status(200).json(response);
   } catch (error) {
     console.error("Failed to fetch candle data:", error);
-    res.status(500).json({ error: "Failed to fetch candle data" });
+    res.status(500).json({
+      trades: [],
+      orders: [],
+      positions: [],
+      error: "Failed to fetch TRADES",
+    });
   }
 }
 
@@ -117,19 +107,19 @@ const formatDuration = (durationInMs: number): string => {
 };
 
 // Parses orders and creates positions
-const matchOrdersToPositions = (orders: AggregatedOrder[]): Position[] => {
+const matchOrdersToPositions = (orders: Order[]): Position[] => {
   const buyOrders = orders.filter((order) => order.type === "buy");
   const sellOrders = orders.filter((order) => order.type === "sell");
   const positions: Position[] = [];
 
   // Simplistic approach: match each buy with the closest sell in time
   for (const buy of buyOrders) {
-    let matchingSell = sellOrders.reduce((prev, current) => {
+    const matchingSell = sellOrders.reduce((prev, current) => {
       return prev === null ||
         Math.abs(current.time - buy.time) < Math.abs(prev.time - buy.time)
         ? current
         : prev;
-    }, null as AggregatedOrder | null);
+    }, null as Order | null);
 
     if (matchingSell) {
       const duration = matchingSell.time - buy.time;
