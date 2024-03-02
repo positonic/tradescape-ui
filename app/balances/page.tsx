@@ -3,8 +3,7 @@
 
 import Balances from "@/app/components/Balances";
 
-export default function Page({ params }: { params: { market: string } }) {
-  const { market } = params;
+export default function Page() {
   return (
     <div className="container mx-auto">
       <div className="">

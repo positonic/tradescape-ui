@@ -7,6 +7,8 @@ import { calculateTradingStatistics } from "@/Stats";
 import Orders from "./Orders";
 import Positions from "./Positions";
 import { useSearchParams } from "next/navigation";
+import { Order } from "@/interfaces/Order";
+import { Trade } from "@/interfaces/Trade";
 
 export default function Market({ market }: { market: string }) {
   const searchParams = useSearchParams();
@@ -14,8 +16,8 @@ export default function Market({ market }: { market: string }) {
   const since = searchParams ? searchParams.get("since") : undefined;
 
   const [positions, setPositions] = useState([]);
-  const [trades, setTrades] = useState([]);
-  const [orders, setOrders] = useState([]);
+  const [trades, setTrades] = useState<Trade[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState("");
 
   const statistics = calculateTradingStatistics(positions);

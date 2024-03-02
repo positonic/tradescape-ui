@@ -1,38 +1,25 @@
 // pages/api/candles.js
 import type { NextApiRequest, NextApiResponse } from "next";
-import axios from "axios";
-import { parseExchangePair, transformExchangePairFormat } from "@/utils";
-import ccxt from "ccxt";
-import { calculateUsdValues } from "../../prices";
 import Exchange from "../../interfaces/Exchange";
-
-interface CoinDetail {
-  free: number;
-  used: number;
-  total: number;
-}
-
-interface ExchangeDetail {
-  [coin: string]: CoinDetail;
-  usdValue: { [coin: string]: number };
-}
-
-interface Balances {
-  [exchange: string]: ExchangeDetail;
-}
+import { calculateUsdValues } from "../../prices";
+import ccxt from "ccxt";
+import ExchangeBalance from "@/interfaces/ExchangeBalance";
+import { Balances } from "@/interfaces/BalanceCoinDetail";
 const reformatData = (data: Balances): ExchangeBalance[] => {
-  let reformattedArray: ExchangeBalance[] = [];
+  const reformattedArray: ExchangeBalance[] = [];
 
   Object.entries(data).forEach(([exchange, details]) => {
-    Object.entries(details).forEach(([coin, coinDetail]) => {
-      if (coin !== "usdValue" && details.usdValue[coin] !== undefined) {
+    Object.entries(details).forEach(([coin, coinDetail]: [string, any]) => {
+      const coinUsdValue =
+        details.usdValue[coin as keyof typeof details.usdValue];
+      if (coin !== "usdValue" && coinUsdValue !== undefined) {
         reformattedArray.push({
           coin,
           free: coinDetail.free,
           used: coinDetail.used,
           total: coinDetail.total,
           exchange,
-          usdValue: details.usdValue[coin],
+          usdValue: coinUsdValue as number,
         });
       }
     });
@@ -141,6 +128,8 @@ export default async function handler(
     res.status(200).json({ balances: balanceArray, error: "" });
   } catch (error) {
     console.error("Failed to fetch candle data:", error);
-    res.status(500).json({ error: "Failed to fetch candle data" });
+    res
+      .status(500)
+      .json({ balances: [], error: "Failed to fetch candle data" });
   }
 }

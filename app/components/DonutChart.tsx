@@ -1,6 +1,7 @@
 import React from "react";
-import { DonutChart } from "@mantine/charts";
+import { DonutChart, DonutChartCell } from "@mantine/charts";
 import { formatCurrency } from "@/utils";
+import { DefaultMantineColor } from "@mantine/core";
 
 // Define the shape of a single data entry
 interface Asset {
@@ -15,6 +16,7 @@ interface Asset {
 // Define the props expected by the component
 interface Props {
   assets: Asset[];
+  colors: any;
 }
 type CryptoColors = {
   [key: string]: string;
@@ -82,7 +84,7 @@ const cryptoColors: CryptoColors = {
   USDC: "#ffffff",
 };
 // A utility function to aggregate data by coin
-const aggregateDataByCoin = (assets: Asset[], colors: CryptoColors) => {
+const aggregateDataByCoin = (assets: Asset[]) => {
   const aggregation: Record<string, number> = {};
 
   assets.forEach((asset) => {
@@ -99,12 +101,18 @@ const aggregateDataByCoin = (assets: Asset[], colors: CryptoColors) => {
   }));
 };
 type CryptoAsset = {
-  label: string;
+  name: string;
   value: number;
-  color?: string; // Optional property to be added
+  color: string; // Optional property to be added
 };
 
-const CryptoPieChart: React.FC<Props> = ({ assets }) => {
+const CryptoPieChart: React.FC<Props> = ({
+  assets,
+  colors,
+}: {
+  assets: any[];
+  colors: any;
+}) => {
   const data = aggregateDataByCoin(assets);
 
   const addColorToCryptoItem = (item: CryptoAsset): CryptoAsset => {
@@ -113,8 +121,24 @@ const CryptoPieChart: React.FC<Props> = ({ assets }) => {
       color: cryptoColors[item.name] || "rgb(255, 255, 255)", // Default color if not found
     };
   };
+  const isDefaultMantineColor = (
+    color: string
+  ): color is DefaultMantineColor => {
+    // Example check (you might need to adjust this based on available colors in DefaultMantineColor)
+    const defaultColors: DefaultMantineColor[] = [
+      "blue",
+      "green",
+      "red",
+      "orange",
+      "violet",
+    ]; // Add more as needed
+    return defaultColors.includes(color as DefaultMantineColor);
+  };
 
-  const dataWithColors = data.map(addColorToCryptoItem);
+  const dataWithColors: CryptoAsset[] = data.map(
+    (item: { name: string; value: number }) =>
+      addColorToCryptoItem({ ...item, color: "" })
+  );
 
   return (
     <>
@@ -123,7 +147,10 @@ const CryptoPieChart: React.FC<Props> = ({ assets }) => {
         tooltipDataSource="segment"
         withTooltip
         data={dataWithColors}
-        label={(data) => `${data.label} (${formatCurrency(data.value)} USD)`}
+        // label={(data: any) =>
+        //   `${data.label} (${formatCurrency(data.value)} USD)`
+        // }
+        withLabels
         size={300}
       />
     </>

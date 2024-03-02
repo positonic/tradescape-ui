@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { formatDateTime } from "@/utils";
-export default function Orders({ orders }: { orders: string }) {
+import { Order } from "@/interfaces/Order";
+export default function Orders({ orders }: { orders: Order[] }) {
   const [error, setError] = useState("");
 
   return (

@@ -7,7 +7,7 @@ const largeData = [
   { value: "Kraken", label: "Kraken" },
 ];
 
-export default function Select() {
+export default function SelectBox() {
   const router = useRouter();
   function onChange(value: string | null) {
     if (!value) return;

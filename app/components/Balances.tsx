@@ -103,6 +103,7 @@ const fetchAndUpdateBalances = async (): Promise<FetchUpdate> => {
     }
   } else {
     console.log("fetch: Using cached data", storedData);
+    if (!storedData) throw Error("storedData should not be null");
     return {
       balances: storedData.balances,
       totalBalance: storedData.totalBalance,
@@ -120,7 +121,7 @@ const BalancesComponent: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedExchange, setSelectedExchange] = useState<string>("All");
   const [selectedCoin, setSelectedCoin] = useState<string>("All");
-  const [coins, setCoins] = useState<string>(["All"]);
+  const [coins, setCoins] = useState<string[]>(["All"]);
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [hideStables, setHideStables] = useState(false);
 
@@ -220,7 +221,9 @@ const BalancesComponent: React.FC = () => {
       </div>
       <div className="flex">
         <div className="w-[400px] p-4 text-white">
-          <DonutChart assets={balances} colors={colors} />
+          {balances && colors && (
+            <DonutChart assets={balances} colors={colors} />
+          )}
         </div>
         <div className="flex-grow p-4 text-white">
           {/* <BalanceHistory balanceHistory={history} /> */}

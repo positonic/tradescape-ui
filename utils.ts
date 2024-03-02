@@ -53,8 +53,10 @@ export function formatCurrency(amount: number): string {
     minimumFractionDigits: 2,
   }).format(amount);
 }
-
-export const colors = {
+interface ColorMap {
+  [key: string]: string;
+}
+export const colors: ColorMap = {
   BTC: "rgb(247, 147, 26)",
   BLUR: "rgb(113, 87, 194)",
   MATIC: "rgb(130, 71, 229)",

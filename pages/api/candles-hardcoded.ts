@@ -15887,7 +15887,5 @@ export default function handler(
         conversionSymbol: "",
       },
     ],
-    RateLimit: {},
-    HasWarning: false,
   });
 }

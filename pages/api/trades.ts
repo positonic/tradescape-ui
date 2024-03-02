@@ -23,27 +23,24 @@ interface Position {
   Orders: Order[];
 }
 
-type ResponseData = {
-  trades: Trade[];
-  orders: Order[];
-  positions: Position[];
-  error: string;
-};
-
 import { TradeManager, getExchangeConfig } from "@/TradeManager";
 import { ExchangeConfig } from "@/interfaces/ExchangeConfig";
 import { Trade } from "@/interfaces/Trade";
 import { Order } from "@/interfaces/Order";
+import { TradeResponseData } from "./TradeResponseData";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ResponseData>
+  res: NextApiResponse<TradeResponseData>
 ) {
   //http://localhost:3000/api/trades?exchangeId=binance&since=null
 
   //const pair = "BTC/USDT";
   const market = req.query.market;
-  const { pair } = parseExchangePair(market as string);
+  let pair = "";
+  if (market) {
+    ({ pair } = parseExchangePair(market as string));
+  }
 
   const since = req.query.since ? Number(req.query.since) : undefined;
   // Attempt to retrieve exchangeId from the query, with a fallback
@@ -81,7 +78,12 @@ export default async function handler(
 
     const positions = matchOrdersToPositions(orders);
 
-    const response: ResponseData = { trades, orders, positions, error: "" };
+    const response: TradeResponseData = {
+      trades,
+      orders,
+      positions,
+      error: "",
+    };
     res.status(200).json(response);
   } catch (error) {
     console.error("Failed to fetch candle data:", error);

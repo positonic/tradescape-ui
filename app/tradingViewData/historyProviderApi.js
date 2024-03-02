@@ -9,7 +9,6 @@ export default {
   history: history,
 
   getBars: function (symbolInfo, resolution, from, to, first, limit) {
-    debugger;
     var split_symbol = symbolInfo.name.split(/[:/]/);
     const url =
       resolution === "D"
@@ -17,11 +16,12 @@ export default {
         : resolution >= 60
         ? "/data/histohour"
         : "/data/histominute";
-    console.log("pairs is ", pairs);
-    console.log("between is ", split_symbol[1] + "/" + split_symbol[2]);
-    console.log("e is", pairs[split_symbol[1] + "/" + split_symbol[2]]);
+    // console.log("pairs is ", pairs);
+    // console.log("between is ", split_symbol[1] + "/" + split_symbol[2]);
+    // console.log("e is", pairs[split_symbol[1] + "/" + split_symbol[2]]);
     const qs = {
-      e: pairs[split_symbol[1] + "/" + split_symbol[2]],
+      //e: pairs[split_symbol[1] + "/" + split_symbol[2]],
+      e: "BTC/USDT", // Hard coding for eslint
       fsym: split_symbol[1],
       tsym: split_symbol[2],
       toTs: to ? to : "",

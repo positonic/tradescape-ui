@@ -1,3 +1,4 @@
+/* eslint-disable */
 import styles from "./index.module.css";
 import { useEffect, useRef } from "react";
 import {
@@ -8,6 +9,7 @@ import {
 } from "@/public/static/charting_library/charting_library.min";
 import Link from "next/link";
 import tradingViewData from "@/app/tradingViewData";
+import { Trade } from "@/interfaces/Trade";
 
 interface TVChartContainerProps extends ChartingLibraryWidgetOptions {
   trades: any;
@@ -31,7 +33,8 @@ export const TVChartContainer = (props: Partial<TVChartContainerProps>) => {
       //     expectedOrder: "latestFirst",
       //   }
       // ),
-      datafeed: tradingViewData,
+      /* eslint-disable */
+      datafeed: tradingViewData as any,
       interval: props.interval as ResolutionString,
       //   container: chartContainerRef.current,
       container_id: "container_id",
@@ -59,14 +62,14 @@ export const TVChartContainer = (props: Partial<TVChartContainerProps>) => {
       // Add trades to the chart
       console.log("trades is ", trades);
       if (trades && trades.length) {
-        trades.forEach((trade) => {
+        trades.forEach((trade: Trade) => {
           const time = new Date(trade.time).getTime() / 1000; // Convert to UNIX timestamp
           console.log("Making trade on chart", trade, new Date(trade.time));
           chart.createShape(
             // First argument: point
             {
               time: time,
-              price: trade.price,
+              price: Number(trade.price),
             },
             // Second argument: options
             {

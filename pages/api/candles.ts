@@ -29,8 +29,15 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
-  const market = req.query.market;
-  console.log("fetching candles for ", market);
+  const qMarket = req.query.market;
+
+  console.log("fetching candles for ", qMarket);
+  const market: string | undefined = Array.isArray(qMarket)
+    ? qMarket[0]
+    : qMarket;
+  if (!market) {
+    throw Error("Invalid or missing market");
+  }
   const { exchange, pair } = parseExchangePair(
     transformExchangePairFormat(market) as string
   );
@@ -48,6 +55,7 @@ export default async function handler(
     res.status(200).json(response.data);
   } catch (error) {
     console.error("Failed to fetch candle data:", error);
-    res.status(500).json({ error: "Failed to fetch candle data" });
+    // res.status(500).json({ Response: "Failed to fetch candle data" });
+    throw new Error("Failed to fetch candle data");
   }
 }

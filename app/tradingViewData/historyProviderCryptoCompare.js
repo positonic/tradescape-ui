@@ -8,7 +8,6 @@ export default {
   history: history,
 
   getBars: function (symbolInfo, resolution, from, to, first, limit) {
-    debugger;
     var split_symbol = symbolInfo.name.split(/[:/]/);
     const url =
       resolution === "D"

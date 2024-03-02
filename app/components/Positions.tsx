@@ -20,6 +20,7 @@ export default function Positions({ positions }: PositionsProps) {
     return orders.length > 0
       ? orders.map((order: any, index: any) => (
           <OrderRowPartial
+            key={index}
             order={order}
             index={index}
             extraClass={"bg-gray-100"}

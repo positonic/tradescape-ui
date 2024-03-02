@@ -17,7 +17,12 @@ const OpenOrders = () => {
         if (data.error) throw new Error(data.error);
         setOrders(data.orders);
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          // If it's not an Error instance, you might want to set a generic error message
+          setError("An unexpected error occurred");
+        }
       }
     };
 

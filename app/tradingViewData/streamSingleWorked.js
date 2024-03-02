@@ -1,25 +1,27 @@
 // api/stream.js
-import historyProvider from './historyProvider.js'
+import historyProvider from "./historyProvider.js";
 // we use Socket.io client to connect to cryptocompare's socket.io stream
-var io = require('socket.io-client')
+// eslint-disable-next-line
+var io = require("socket.io-client");
 
-window.appUrl = process.env.REACT_APP_API_URL
-window.socket = typeof window.socket !== 'undefined' ? window.socket : io(window.appUrl)
-const socket = window.socket
+window.appUrl = process.env.REACT_APP_API_URL;
+window.socket =
+  typeof window.socket !== "undefined" ? window.socket : io(window.appUrl);
+const socket = window.socket;
 
 // keep track of subscriptions
-var _subs = []
-var subscription = {}
-let channelString
+var _subs = [];
+var subscription = {};
+let channelString;
 
 export default {
   subscribeBars: function (symbolInfo, resolution, updateCb, uid, resetCache) {
-    channelString = createChannelString(symbolInfo, resolution)
+    channelString = createChannelString(symbolInfo, resolution);
     // socket.emit('SubAdd', {subs: [channelString]})
-    console.log('emmitting -----> SuperStar Connection for candle sub')
-    console.log(`resolution ---> : ${resolution}`)
-    console.log(`channelString ---> : ${channelString}`)
-    socket.emit('SubAdd', channelString)
+    console.log("emmitting -----> SuperStar Connection for candle sub");
+    console.log(`resolution ---> : ${resolution}`);
+    console.log(`channelString ---> : ${channelString}`);
+    socket.emit("SubAdd", channelString);
 
     subscription = {
       channelString,
@@ -27,8 +29,8 @@ export default {
       resolution,
       symbolInfo,
       lastBar: historyProvider.history[symbolInfo.name].lastBar,
-      listener: updateCb
-    }
+      listener: updateCb,
+    };
   },
   unsubscribeBars: function (uid) {
     // var subIndex = _subs.findIndex(e => e.uid === uid)
@@ -37,21 +39,21 @@ export default {
     //     return
     // }
     // var sub = _subs[subIndex]
-    socket.emit('SubRemove', channelString)
+    socket.emit("SubRemove", channelString);
     // _subs.splice(subIndex, 1)
-  }
-}
+  },
+};
 
-socket.on('connect', () => {
-  console.log('===Socket connected')
-})
-socket.on('disconnect', (e) => {
-  console.log('===Socket disconnected:', e)
-})
-socket.on('error', err => {
-  console.log('====socket error', err)
-})
-socket.on('lastCandle', (e) => {
+socket.on("connect", () => {
+  console.log("===Socket connected");
+});
+socket.on("disconnect", (e) => {
+  console.log("===Socket disconnected:", e);
+});
+socket.on("error", (err) => {
+  console.log("====socket error", err);
+});
+socket.on("lastCandle", (e) => {
   // console.log(`!!!!LAST**** : ${JSON.stringify(e, null, 2)}`)
 
   // console.log(`subscription : ${JSON.stringify(subscription, null, 2)}`)
@@ -61,18 +63,18 @@ socket.on('lastCandle', (e) => {
     const data = {
       sub_type: 0,
       exchange: subscription.symbolInfo.exchange,
-      to_sym: subscription.symbolInfo.ticker.split(':')[1].split('/')[0],
-      from_sym: subscription.symbolInfo.ticker.split(':')[1].split('/')[1],
-      trade_id: 'xxxxx',
+      to_sym: subscription.symbolInfo.ticker.split(":")[1].split("/")[0],
+      from_sym: subscription.symbolInfo.ticker.split(":")[1].split("/")[1],
+      trade_id: "xxxxx",
       ts: parseInt(e.timestampMs, 10) / 1000,
       volume: parseFloat(e.volume),
-      price: parseFloat(e.close)
-    }
+      price: parseFloat(e.close),
+    };
 
-    var _lastBar = updateBar(data, subscription)
+    var _lastBar = updateBar(data, subscription);
 
-    subscription.listener(_lastBar)
-    subscription.lastBar = _lastBar
+    subscription.listener(_lastBar);
+    subscription.lastBar = _lastBar;
   }
 
   // here we get all events the CryptoCompare connection has subscribed to
@@ -120,24 +122,24 @@ socket.on('lastCandle', (e) => {
   //         // update our own record of lastBar
   //         sub.lastBar = _lastBar
   //     }
-})
+});
 
 // Take a single trade, and subscription record, return updated bar
-function updateBar (data, sub) {
-  var lastBar = sub.lastBar
-  let resolution = sub.resolution
-  if (resolution.includes('D')) {
+function updateBar(data, sub) {
+  var lastBar = sub.lastBar;
+  let resolution = sub.resolution;
+  if (resolution.includes("D")) {
     // 1 day in minutes === 1440
-    resolution = 1440
-  } else if (resolution.includes('W')) {
+    resolution = 1440;
+  } else if (resolution.includes("W")) {
     // 1 week in minutes === 10080
-    resolution = 10080
+    resolution = 10080;
   }
-  var coeff = resolution * 60
+  var coeff = resolution * 60;
   // console.log({coeff})
-  var rounded = Math.floor(data.ts / coeff) * coeff
-  var lastBarSec = lastBar.time / 1000
-  var _lastBar
+  var rounded = Math.floor(data.ts / coeff) * coeff;
+  var lastBarSec = lastBar.time / 1000;
+  var _lastBar;
 
   if (rounded > lastBarSec) {
     // create a new candle, use last close as open **PERSONAL CHOICE**
@@ -147,41 +149,41 @@ function updateBar (data, sub) {
       high: lastBar.close,
       low: lastBar.close,
       close: data.price,
-      volume: data.volume
-    }
+      volume: data.volume,
+    };
   } else {
     // update lastBar candle!
     if (data.price < lastBar.low) {
-      lastBar.low = data.price
+      lastBar.low = data.price;
     } else if (data.price > lastBar.high) {
-      lastBar.high = data.price
+      lastBar.high = data.price;
     }
 
-    lastBar.volume = data.volume
-    lastBar.close = data.price
-    _lastBar = lastBar
+    lastBar.volume = data.volume;
+    lastBar.close = data.price;
+    _lastBar = lastBar;
   }
-  return _lastBar
+  return _lastBar;
 }
 
 // takes symbolInfo object as input and creates the subscription string to send to CryptoCompare
-function createChannelStringCryptoCompare (symbolInfo) {
-  console.log('CreateChannelString', symbolInfo)
-  var channel = symbolInfo.name.split(/[:/]/)
-  const exchange = channel[0] === 'GDAX' ? 'Coinbase' : channel[0]
-  const to = channel[2]
-  const from = channel[1]
+function createChannelStringCryptoCompare(symbolInfo) {
+  console.log("CreateChannelString", symbolInfo);
+  var channel = symbolInfo.name.split(/[:/]/);
+  const exchange = channel[0] === "GDAX" ? "Coinbase" : channel[0];
+  const to = channel[2];
+  const from = channel[1];
   // subscribe to the CryptoCompare trade channel for the pair and exchange
-  return `0~${exchange}~${from}~${to}`
+  return `0~${exchange}~${from}~${to}`;
 }
 
 // takes symbolInfo object as input and creates the subscription string to send to CryptoCompare
-function createChannelString (symbolInfo, resolution) {
-  console.log('CreateChannelString', symbolInfo)
-  var channel = symbolInfo.name.split(/[:/]/)
-  const exchange = channel[0] === 'GDAX' ? 'Coinbase' : channel[0]
-  const to = channel[2]
-  const from = channel[1]
+function createChannelString(symbolInfo, resolution) {
+  console.log("CreateChannelString", symbolInfo);
+  var channel = symbolInfo.name.split(/[:/]/);
+  const exchange = channel[0] === "GDAX" ? "Coinbase" : channel[0];
+  const to = channel[2];
+  const from = channel[1];
   // subscribe to the CryptoCompare trade channel for the pair and exchange
-  return `${exchange}:${from}${to}-${resolution}`
+  return `${exchange}:${from}${to}-${resolution}`;
 }

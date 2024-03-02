@@ -37,8 +37,8 @@ export default function Trades({ trades }: { trades: Trade[] }) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {trades.map((trade: Trade) => (
-              <TradeRow trade={trade} />
+            {trades.map((trade: Trade, index: number) => (
+              <TradeRow key={index} trade={trade} />
             ))}
           </tbody>
         </table>

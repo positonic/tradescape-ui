@@ -1,3 +1,4 @@
+/* eslint-disable */
 import historyProvider from "./historyProvider";
 //import historyProvider from "./historyProviderCryptoCompare";
 //import historyProvider from "./historyProviderApi";
@@ -135,7 +136,7 @@ export default {
         console.log("Error gettingBars");
 
         console.log({ err });
-        debugger;
+        //debugger;
         onErrorCallback(err);
       });
   },

@@ -31,7 +31,7 @@
       "unix"
     ],
     "quotes": [
-      "error"
+      "off"
     ],
     "no-unused-vars": "warn",
     "react/react-in-jsx-scope": "off",

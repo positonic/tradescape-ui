@@ -261,7 +261,12 @@ export class SymbolsStorage {
             try {
               this._onExchangeDataReceived(exchange, response);
             } catch (error) {
-              reject(error);
+              if (error instanceof Error) {
+                reject(error);
+              } else {
+                // Handle or reject with a generic Error if you received something unexpected
+                reject(new Error("An unexpected error occurred"));
+              }
               return;
             }
 
@@ -373,7 +378,7 @@ export class SymbolsStorage {
       }
     } catch (error) {
       throw new Error(
-        `SymbolsStorage: API error when processing exchange ${exchange} symbol #${symbolIndex} (${data.symbol[symbolIndex]}): ${error.message}`
+        `SymbolsStorage: API error when processing exchange ${exchange} symbol #${symbolIndex} (${data.symbol[symbolIndex]}): ${error}`
       );
     }
   }
