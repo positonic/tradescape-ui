@@ -1,10 +1,10 @@
 import Image from "next/image";
-import { type ComponentProps } from "react";
+//import { type ComponentProps } from "react";
 
-type Partner = {
-  logo: string;
-  name: string;
-};
+// type Partner = {
+//   logo: string;
+//   name: string;
+// };
 export default function Partner({
   logo,
   name,

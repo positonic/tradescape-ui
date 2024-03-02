@@ -285,37 +285,35 @@ const BalancesComponent: React.FC = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {balances &&
-              balances.map(
-                ({ coin, free, used, total, usdValue, exchange }) => {
-                  if (total > 0 && usdValue > 100) {
-                    return (
-                      <tr key={exchange + "-" + coin} className="mb-2">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <svg
-                            className="inline-block"
-                            width="20"
-                            height="20"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <circle cx="10" cy="10" r="5" fill={colors[coin]} />
-                          </svg>
-                          <span className="inline-block">{coin}</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {exchange}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {total}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatCurrency(usdValue)}
-                        </td>
-                      </tr>
-                    );
-                  }
-                  return null;
+              balances.map(({ coin, total, usdValue, exchange }) => {
+                if (total > 0 && usdValue > 100) {
+                  return (
+                    <tr key={exchange + "-" + coin} className="mb-2">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <svg
+                          className="inline-block"
+                          width="20"
+                          height="20"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <circle cx="10" cy="10" r="5" fill={colors[coin]} />
+                        </svg>
+                        <span className="inline-block">{coin}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {exchange}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {total}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatCurrency(usdValue)}
+                      </td>
+                    </tr>
+                  );
                 }
-              )}
+                return null;
+              })}
           </tbody>
         </table>
       </div>

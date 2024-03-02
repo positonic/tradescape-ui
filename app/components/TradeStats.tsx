@@ -1,4 +1,3 @@
-import Position from "@/interfaces/Position";
 import TradingStatistics from "@/interfaces/TradingStatistics";
 import React from "react";
 

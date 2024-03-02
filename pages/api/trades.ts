@@ -6,7 +6,7 @@ import Exchange, {
   aggregateTrades,
 } from "@/Exchange";
 
-import { sortDescending, sortAscending, parseExchangePair } from "@/utils";
+import { sortDescending, parseExchangePair } from "@/utils";
 
 // Define the interface for the Trade array
 export type FetchTradesReturnType = Record<string, Trade>;

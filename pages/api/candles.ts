@@ -38,7 +38,7 @@ export default async function handler(
   if (!market) {
     throw Error("Invalid or missing market");
   }
-  const { exchange, pair } = parseExchangePair(
+  const { pair } = parseExchangePair(
     transformExchangePairFormat(market) as string
   );
   console.log("pair: ", pair);

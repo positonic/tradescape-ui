@@ -15,7 +15,8 @@ var subscription = {};
 let channelString;
 
 export default {
-  subscribeBars: function (symbolInfo, resolution, updateCb, uid, resetCache) {
+  //subscribeBars: function (symbolInfo, resolution, updateCb, uid, resetCache) {
+  subscribeBars: function (symbolInfo, resolution, updateCb, uid) {
     channelString = createChannelString(symbolInfo, resolution);
     // socket.emit('SubAdd', {subs: [channelString]})
     console.log("emmitting -----> SuperStar Connection for candle sub");
@@ -33,6 +34,7 @@ export default {
     };
   },
   unsubscribeBars: function (uid) {
+    console.log("unsubscribeBars uid", uid);
     // var subIndex = _subs.findIndex(e => e.uid === uid)
     // if (subIndex === -1) {
     //     //console.log("No subscription found for ",uid)
@@ -167,15 +169,15 @@ function updateBar(data, sub) {
 }
 
 // takes symbolInfo object as input and creates the subscription string to send to CryptoCompare
-function createChannelStringCryptoCompare(symbolInfo) {
-  console.log("CreateChannelString", symbolInfo);
-  var channel = symbolInfo.name.split(/[:/]/);
-  const exchange = channel[0] === "GDAX" ? "Coinbase" : channel[0];
-  const to = channel[2];
-  const from = channel[1];
-  // subscribe to the CryptoCompare trade channel for the pair and exchange
-  return `0~${exchange}~${from}~${to}`;
-}
+// function createChannelStringCryptoCompare(symbolInfo) {
+//   console.log("CreateChannelString", symbolInfo);
+//   var channel = symbolInfo.name.split(/[:/]/);
+//   const exchange = channel[0] === "GDAX" ? "Coinbase" : channel[0];
+//   const to = channel[2];
+//   const from = channel[1];
+//   // subscribe to the CryptoCompare trade channel for the pair and exchange
+//   return `0~${exchange}~${from}~${to}`;
+// }
 
 // takes symbolInfo object as input and creates the subscription string to send to CryptoCompare
 function createChannelString(symbolInfo, resolution) {

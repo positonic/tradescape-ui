@@ -16,9 +16,7 @@ export default function Market({ market }: { market: string }) {
   const since = searchParams ? searchParams.get("since") : undefined;
 
   const [positions, setPositions] = useState([]);
-  const [trades, setTrades] = useState<Trade[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [error, setError] = useState("");
 
   const statistics = calculateTradingStatistics(positions);
   useEffect(() => {

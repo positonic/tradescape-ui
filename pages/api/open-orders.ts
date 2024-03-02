@@ -13,11 +13,11 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
-  const since = req.query.since ? Number(req.query.since) : undefined;
+  //const since = req.query.since ? Number(req.query.since) : undefined;
 
   const exchangeIdRaw = req.query.exchangeId;
-  const market = req.query.market;
-  const pair = "BTC/USDT";
+  //   const market = req.query.market;
+  //   const pair = "BTC/USDT";
 
   if (typeof exchangeIdRaw !== "string" || !isExchangeName(exchangeIdRaw)) {
     return res

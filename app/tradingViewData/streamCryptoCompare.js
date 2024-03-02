@@ -9,7 +9,8 @@ var socket = io(socket_url);
 var _subs = [];
 
 export default {
-  subscribeBars: function (symbolInfo, resolution, updateCb, uid, resetCache) {
+  //subscribeBars: function (symbolInfo, resolution, updateCb, uid, resetCache) {
+  subscribeBars: function (symbolInfo, resolution, updateCb, uid) {
     const channelString = createChannelString(symbolInfo);
     socket.emit("SubAdd", { subs: [channelString] });
 

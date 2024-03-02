@@ -16,7 +16,7 @@ export default async function handler(
   const since = req.query.since ? Number(req.query.since) : undefined;
 
   const exchangeIdRaw = req.query.exchangeId;
-  const market = req.query.market;
+  //const market = req.query.market;
   const pair = "BTC/USDT";
 
   if (typeof exchangeIdRaw !== "string" || !isExchangeName(exchangeIdRaw)) {

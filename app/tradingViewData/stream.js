@@ -11,11 +11,12 @@ const socket = window.socket;
 
 // keep track of subscriptions
 var _subs = [];
-var subscription = {};
+//var subscription = {};
 let marketKey;
 
 export default {
-  subscribeBars: function (symbolInfo, resolution, updateCb, uid, resetCache) {
+  //subscribeBars: function (symbolInfo, resolution, updateCb, uid, resetCache) {
+  subscribeBars: function (symbolInfo, resolution, updateCb, uid) {
     marketKey = createMarketKey(symbolInfo, resolution);
     // socket.emit('SubAdd', {subs: [channelString]})
     console.log(
@@ -192,18 +193,19 @@ function updateBar(data, sub) {
 }
 
 // takes symbolInfo object as input and creates the subscription string to send to CryptoCompare
-function createChannelStringCryptoCompare(symbolInfo) {
-  console.log("CreateChannelString", symbolInfo);
-  var channel = symbolInfo.name.split(/[:/]/);
-  const exchange = channel[0] === "GDAX" ? "Coinbase" : channel[0];
-  const to = channel[2];
-  const from = channel[1];
-  // subscribe to the CryptoCompare trade channel for the pair and exchange
-  return `0~${exchange}~${from}~${to}`;
-}
+// function createChannelStringCryptoCompare(symbolInfo) {
+//   console.log("CreateChannelString", symbolInfo);
+//   var channel = symbolInfo.name.split(/[:/]/);
+//   const exchange = channel[0] === "GDAX" ? "Coinbase" : channel[0];
+//   const to = channel[2];
+//   const from = channel[1];
+//   // subscribe to the CryptoCompare trade channel for the pair and exchange
+//   return `0~${exchange}~${from}~${to}`;
+// }
 
 // takes symbolInfo object as input and creates the subscription string to send to CryptoCompare
-function createMarketKey(symbolInfo, resolution) {
+//function createMarketKey(symbolInfo, resolution) {
+function createMarketKey(symbolInfo) {
   console.log("CreateChannelString", symbolInfo);
   var channel = symbolInfo.name.split(/[:/]/);
   const exchange = channel[0] === "GDAX" ? "Coinbase" : channel[0];

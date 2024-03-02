@@ -1,6 +1,5 @@
 // pages/api/candles.js
 import type { NextApiRequest, NextApiResponse } from "next";
-import { parseExchangePair, transformExchangePairFormat } from "@/utils";
 import ccxt from "ccxt";
 import { calculateUsdValues } from "../../prices";
 import Exchange from "../../interfaces/Exchange";

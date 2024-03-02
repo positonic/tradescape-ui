@@ -1,10 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
-import { formatDateTime } from "@/utils";
+import { useState } from "react";
 import { Trade } from "@/interfaces/Trade";
 import TradeRow from "./TradeRowPartial";
 export default function Trades({ trades }: { trades: Trade[] }) {
-  const [error, setError] = useState("");
+  const [error] = useState("");
 
   return (
     <div>

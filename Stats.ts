@@ -8,8 +8,8 @@ export function calculateTradingStatistics(
   let losses = 0;
   let totalProfit = 0;
   let totalLoss = 0;
-  let holdingTimes: number[] = [];
-  let profitsAndLosses: number[] = [];
+  const holdingTimes: number[] = [];
+  const profitsAndLosses: number[] = [];
 
   positions.forEach((position) => {
     if (!position.ProfitLoss)

@@ -1,5 +1,5 @@
 import React from "react";
-import { DonutChart, DonutChartCell } from "@mantine/charts";
+import { DonutChart } from "@mantine/charts";
 import { formatCurrency } from "@/utils";
 import { DefaultMantineColor } from "@mantine/core";
 
@@ -20,37 +20,6 @@ interface Props {
 }
 type CryptoColors = {
   [key: string]: string;
-};
-
-const cryptoColors1: CryptoColors = {
-  BTC: "#f7931a",
-  BLUR: "#7157c2",
-  MATIC: "#8247e5",
-  USD: "#007a33",
-  ZETA: "#4882b4",
-  JUP: "#ffa500",
-  ONDO: "#ff6347",
-  PYTH: "#ffdfba",
-  BEAM: "#4caf50",
-  LENDS: "#fafafa",
-  TIA: "#40e0d0",
-  GRT: "#607d8b",
-  SUI: "#ff69b4",
-  ETH: "#6c5ce7",
-  MAV: "#ffd700",
-  UMA: "#00bfff",
-  ARB: "#00ced1",
-  STX: "#ff4500",
-  JTO: "#9932cc",
-  SUPER: "#e91e63",
-  VET: "#0000ff",
-  NEAR: "#ff304f",
-  DOT: "#e91e63",
-  ALGO: "#00b2ff",
-  ADA: "#399aca",
-  AVAX: "#e32636",
-  USDT: "#07c160",
-  USDC: "#ffffff",
 };
 
 const cryptoColors: CryptoColors = {
@@ -106,13 +75,7 @@ type CryptoAsset = {
   color: string; // Optional property to be added
 };
 
-const CryptoPieChart: React.FC<Props> = ({
-  assets,
-  colors,
-}: {
-  assets: any[];
-  colors: any;
-}) => {
+const CryptoPieChart: React.FC<Props> = ({ assets }: { assets: any[] }) => {
   const data = aggregateDataByCoin(assets);
 
   const addColorToCryptoItem = (item: CryptoAsset): CryptoAsset => {
@@ -120,19 +83,6 @@ const CryptoPieChart: React.FC<Props> = ({
       ...item,
       color: cryptoColors[item.name] || "rgb(255, 255, 255)", // Default color if not found
     };
-  };
-  const isDefaultMantineColor = (
-    color: string
-  ): color is DefaultMantineColor => {
-    // Example check (you might need to adjust this based on available colors in DefaultMantineColor)
-    const defaultColors: DefaultMantineColor[] = [
-      "blue",
-      "green",
-      "red",
-      "orange",
-      "violet",
-    ]; // Add more as needed
-    return defaultColors.includes(color as DefaultMantineColor);
   };
 
   const dataWithColors: CryptoAsset[] = data.map(

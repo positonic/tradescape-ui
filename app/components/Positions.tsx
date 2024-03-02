@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Accordion } from "@mantine/core";
+import { useState } from "react";
+// import { Accordion } from "@mantine/core";
 import OrderRowPartial from "./OrderRowPartial";
 import { formatCurrency } from "@/utils";
 import Position from "@/interfaces/Position";
@@ -10,7 +10,7 @@ interface PositionsProps {
 }
 
 export default function Positions({ positions }: PositionsProps) {
-  const [error, setError] = useState("");
+  const [error] = useState("");
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
 
   console.log("positions is ", positions);

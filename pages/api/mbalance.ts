@@ -1,4 +1,7 @@
 // pages/api/candles.js
+/**
+ * Margin balances example
+ */
 import type { NextApiRequest, NextApiResponse } from "next";
 import Exchange from "../../interfaces/Exchange";
 import { calculateUsdValues } from "../../prices";
@@ -50,15 +53,15 @@ export default async function handler(
   }
 
   // Initialize exchanges with your API keys from .env
-  const bybit = new ccxt.bybit({
-    apiKey: process.env.BYBIT_API_KEY, // Loaded from .env
-    secret: process.env.BYBIT_API_SECRET, // Loaded from .env
-  });
+  //   const bybit = new ccxt.bybit({
+  //     apiKey: process.env.BYBIT_API_KEY, // Loaded from .env
+  //     secret: process.env.BYBIT_API_SECRET, // Loaded from .env
+  //   });
 
-  const binance = new ccxt.binance({
-    apiKey: process.env.BINANCE_API_KEY, // Loaded from .env
-    secret: process.env.BINANCE_API_SECRET, // Loaded from .env
-  });
+  //   const binance = new ccxt.binance({
+  //     apiKey: process.env.BINANCE_API_KEY, // Loaded from .env
+  //     secret: process.env.BINANCE_API_SECRET, // Loaded from .env
+  //   });
 
   const kraken = new ccxt.kraken({
     apiKey: process.env.KRAKEN_API_KEY, // Loaded from .env

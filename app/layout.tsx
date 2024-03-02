@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Rainbow from "./rainbow";
 import "@mantine/core/styles.css";
 import "@mantine/charts/styles.css";
 

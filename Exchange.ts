@@ -321,7 +321,7 @@ export function createPositionsFromOrders(
 ): Position[] {
   console.log("createPositionsFromOrders");
   console.log("args.orders", orders);
-  let positions: Position[] = [];
+  const positions: Position[] = [];
   let openPosition = 0;
   let positionCost = 0;
   let positionBuyCost = 0;
@@ -349,7 +349,7 @@ export function createPositionsFromOrders(
       console.log(" >> positionCost:    " + positionCost);
       console.log(" >>>> buyCost:         " + buyCost);
     } else {
-      let amountSold = order.amount;
+      const amountSold = order.amount;
       const sellCost = order.amount * order.averagePrice;
       positionSellCost += sellCost;
       console.log(" > start: openPosition " + openPosition);
@@ -731,7 +731,7 @@ export default class Exchange {
     market: string,
     since: number | undefined
   ): Promise<FetchTradesReturnType> {
-    let allTrades: FetchTradesReturnType = {};
+    const allTrades: FetchTradesReturnType = {};
     // let since: number | undefined = undefined;
     const limit: number = 100; // Adjust as needed
 
