@@ -1,23 +1,29 @@
 "use client";
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useFetchTrades } from "../hooks/fetchTrades";
-import { getStartOfDayTimestamp } from "@/utils";
+import { getStartOfYesterdayTimestamp } from "@/utils";
 import { TradeResponseData } from "@/pages/api/TradeResponseData";
 import Positions from "./Positions";
 import Orders from "./Orders";
+import Signin from "./Signin";
+// Import useAccount from wagmi instead of RainbowKit
+import { useAccount } from "wagmi";
+import Settings from "./Settings";
 
 const MarketContent = () => {
-  const todayTimestamp = getStartOfDayTimestamp();
-  const [data, error]: [TradeResponseData | null, any] =
-    useFetchTrades(todayTimestamp);
+  const startTimestamp = getStartOfYesterdayTimestamp();
+  const [data, error] = useFetchTrades(startTimestamp);
+  // Use the useAccount hook from wagmi to check wallet connection
 
   if (error) {
     return <div>Error: {error}</div>;
   }
 
+  // If not connected, render the Signin component
+
+  // Render the content if the user's wallet is connected
   return (
     <div>
-      {/* <pre>{JSON.stringify(data, null, 2)}</pre> */}
       {data && data.positions && (
         <>
           <h3>Positions</h3>
@@ -30,24 +36,36 @@ const MarketContent = () => {
           <Orders orders={data.orders} />
         </>
       )}
-
-      {/* <div className="flex">
-          <div className="w-[400px] p-4 text-white"></div>
-          <div className="flex-grow p-4 text-white">
-            <TradingStats statistics={statistics} />
-          </div>
-        </div> */}
-      {/* <Trades trades={trades} /> */}
     </div>
   );
 };
 
 export default function Today() {
+  const [isSettingsSaved, setIsSettingsSaved] = useState(false);
+  const { isConnected } = useAccount();
+
+  useEffect(() => {
+    // Check if API keys are stored in localStorage
+    const apiKeys = localStorage.getItem("apiKeys");
+    if (apiKeys) {
+      const keysObject = JSON.parse(apiKeys);
+      // Basic check to see if both keys exist
+      if (keysObject.Binance && keysObject.Kraken) {
+        setIsSettingsSaved(true);
+      }
+    }
+  }, []);
+
+  if (!isConnected) {
+    return <Signin />;
+  }
+
   return (
     <div className="container mx-auto">
       <h1>Today</h1>
       <Suspense fallback={<div>Loading...</div>}>
-        <MarketContent />
+        {isSettingsSaved && <MarketContent />}
+        {!isSettingsSaved && <Settings />}
       </Suspense>
     </div>
   );

@@ -100,3 +100,14 @@ export function getStartOfDayTimestamp(): number {
   const timestamp = startOfDay.getTime(); // Get the timestamp in milliseconds since the Unix Epoch
   return timestamp;
 }
+
+export function getStartOfYesterdayTimestamp(): number {
+  const now = new Date(); // Get the current date and time
+  const startOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 1
+  ); // Set time to 00:00:00.000
+  const timestamp = startOfDay.getTime(); // Get the timestamp in milliseconds since the Unix Epoch
+  return timestamp;
+}
