@@ -2,6 +2,7 @@ import ccxt, {
   Exchange as CCXTExchange,
   Trade as CCxtLibTrade,
   Position as CCxtPosition,
+  Order as CCxtOrder,
 } from "ccxt"; // renaming Exchange from ccxt to CCXTExchange to avoid naming conflict
 
 import { apiKeys } from "@/ApiKeys";
@@ -562,6 +563,26 @@ export function createPositionsFromOrders(
 
 //   return positions;
 // }
+function mapCCxtOrdersToOrders(exchange: string, orders: CCxtOrder[]): Order[] {
+  return orders.map((order) => ({
+    id: order.id,
+    ordertxid: order.clientOrderId,
+    time: order.timestamp,
+    date: new Date(order.datetime),
+    type: order.side as "buy" | "sell",
+    pair: order.symbol,
+    amount: order.amount,
+    highestPrice: order.price,
+    lowestPrice: order.price,
+    averagePrice: order.price,
+    exchange: exchange, // Placeholder for actual exchange name
+    trades: [], // Placeholder, assuming no trade data available
+    orderId: order.id,
+    status: order.status,
+    totalCost: parseFloat(order.info.cost),
+    fee: order.fee && order.fee.cost ? order.fee.cost : 0,
+  }));
+}
 export default class Exchange {
   protected client: CCXTExchange;
 
@@ -593,6 +614,11 @@ export default class Exchange {
     });
   }
 
+  /**
+   * Fetch open margin positions
+   * @param markets
+   * @returns
+   */
   async fetchOpenPositions(markets?: string[]): Promise<any> {
     try {
       const positions: CCxtPosition[] = await this.client.fetchPositions(
@@ -606,14 +632,21 @@ export default class Exchange {
       return {} as FetchTradesReturnType; // Return an empty Record<string, Trade>
     }
   }
-  async fetchOpenOrders(market?: string): Promise<any> {
+
+  /**
+   *  Fetch open orders
+   * @param market for which market? / undefined for all markets
+   * @returns
+   */
+  async fetchOpenOrders(exchange: string, pair?: string): Promise<Order[]> {
     try {
-      const orders: any[] = await this.client.fetchOpenOrders(market);
+      console.log(pair);
+      const orders: CCxtOrder[] = await this.client.fetchOpenOrders(pair);
       console.log("fetchOpenPositions: orders", orders);
-      return orders;
+      return mapCCxtOrdersToOrders(exchange, orders);
     } catch (error) {
       console.warn(`Error fetching trades from ${this.client.name}:`, error);
-      return {} as FetchTradesReturnType; // Return an empty Record<string, Trade>
+      return [] as Order[]; // Return an empty Record<string, Trade>
     }
   }
 
@@ -1381,11 +1414,11 @@ export default class Exchange {
 // const ethPositions = createPositionsFromOrders(ethOrdersThisYear, "binance");
 // console.log("arbPositions", ethPositions);
 
-export type ExchangeName = "kraken" | "binance";
+export type ExchangeName = "kraken" | "binance" | "bybit" | "bitmex" | "ftx";
 
 // Utility type guard to check if a string is a valid ExchangeName
 export function isExchangeName(value: string): value is ExchangeName {
-  return ["binance", "kraken"].includes(value);
+  return ["binance", "kraken", "bybit"].includes(value);
 }
 
 export function initExchanges() {

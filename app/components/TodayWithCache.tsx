@@ -1,6 +1,7 @@
 "use client";
 import React, { Suspense, useEffect, useState } from "react";
-import { useFetchTrades } from "../hooks/fetchTrades";
+//import { useFetchTrades } from "../hooks/fetchTrades";
+import { useFetchAndCacheTrades } from "../hooks/fetchAndCacheTrades";
 import { getStartOfYesterdayTimestamp } from "@/utils";
 import { TradeResponseData } from "@/pages/api/TradeResponseData";
 import Positions from "./Positions";
@@ -9,11 +10,10 @@ import Signin from "./Signin";
 // Import useAccount from wagmi instead of RainbowKit
 import { useAccount } from "wagmi";
 import Settings from "./Settings";
-import { useExchangeManager } from "../hooks/exchangeManager";
 
 const MarketContent = () => {
   const startTimestamp = getStartOfYesterdayTimestamp();
-  const [data, error] = useFetchTrades(startTimestamp);
+  const [data, error] = useFetchAndCacheTrades(startTimestamp);
   // Use the useAccount hook from wagmi to check wallet connection
 
   if (error) {
@@ -42,9 +42,20 @@ const MarketContent = () => {
 };
 
 export default function Today() {
-  //const [isSettingsSaved, setIsSettingsSaved] = useState(false);
+  const [isSettingsSaved, setIsSettingsSaved] = useState(false);
   const { isConnected } = useAccount();
-  const [isSettingsSaved] = useExchangeManager();
+
+  useEffect(() => {
+    // Check if API keys are stored in localStorage
+    const apiKeys = localStorage.getItem("apiKeys");
+    if (apiKeys) {
+      const keysObject = JSON.parse(apiKeys);
+      // Basic check to see if both keys exist
+      if (keysObject.Binance && keysObject.Kraken) {
+        setIsSettingsSaved(true);
+      }
+    }
+  }, []);
 
   if (!isConnected) {
     return <Signin />;
