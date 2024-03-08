@@ -100,7 +100,7 @@ const CryptoPieChart: React.FC<Props> = ({ assets }: { assets: any[] }) => {
         // label={(data: any) =>
         //   `${data.label} (${formatCurrency(data.value)} USD)`
         // }
-        withLabels
+
         size={300}
       />
     </>
