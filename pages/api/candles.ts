@@ -11,9 +11,19 @@ type Time = {
   volumefrom: number;
   volumeto: number;
   close: number;
-  conversionType: string;
+  string: string;
   conversionSymbol: string;
 };
+
+type ChartRequest = {
+  resolution: string;
+  market: string;
+  from: number;
+  to: number;
+  first: boolean;
+  limit: number | undefined;
+};
+
 type ResponseData = {
   Response: string;
   Type: number;
@@ -24,17 +34,31 @@ type ResponseData = {
   ConversionType: { type: string; conversionSymbol: string };
   Data: Time[];
 };
-
+function validateAndConvertQuery(query: any): ChartRequest {
+  // Implement validation and conversion here
+  // This is a critical step to ensure runtime safety
+  return {
+    resolution: query.resolution,
+    market: query.market as string,
+    from: parseInt(query.from),
+    to: parseInt(query.to),
+    first: query.first === "true",
+    limit: query.limit ? parseInt(query.limit) : undefined,
+  };
+}
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
   const qMarket = req.query.market;
 
+  const { resolution, market, from, to, first, limit } =
+    validateAndConvertQuery(req.query);
+
   console.log("fetching candles for ", qMarket);
-  const market: string | undefined = Array.isArray(qMarket)
-    ? qMarket[0]
-    : qMarket;
+  // const market: string | undefined = Array.isArray(qMarket)
+  //   ? qMarket[0]
+  //   : qMarket;
   if (!market) {
     throw Error("Invalid or missing market");
   }
@@ -46,9 +70,18 @@ export default async function handler(
   const tsym = pair.split("/")[1];
   //defaultWidgetProps.symbol = `${exchange}:${pair}`;
   const toTs = Math.floor(Date.now() / 1000); // Current timestamp in seconds
-  const limit = "1000"; // Example: Get 1000 data points
-  const url = `https://min-api.cryptocompare.com/data/histoday?fsym=${fsym}&tsym=${tsym}&toTs=${toTs}&limit=${limit}`;
 
+  const queryLimit = limit ? limit : "1000";
+  const dataPeriod =
+    resolution === "D"
+      ? "data/histoday"
+      : Number(resolution) >= 60
+      ? "data/histohour"
+      : "data/histominute";
+
+  const url = `https://min-api.cryptocompare.com/${dataPeriod}?fsym=${fsym}&tsym=${tsym}&toTs=${toTs}&limit=${queryLimit}`;
+
+  console.log("cryptocompare url: ", url);
   try {
     const response = await axios.get(url);
     // Assuming the API response structure matches what you're expecting

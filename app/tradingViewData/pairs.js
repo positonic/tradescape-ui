@@ -5,6 +5,7 @@ export default {
   "XLM/ETH": "Bitfinex",
   "XLM/USD": "Bitfinex",
   "BTC/USD": "Binance",
+  "BOME/USD": "Binance",
 };
 
 export const data = [

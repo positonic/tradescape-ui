@@ -68,6 +68,14 @@ export default {
         ticker: "Binance:BCH/USDT",
         type: "crypto", // or "futures" or "bitcoin" or "forex" or "index"
       },
+      {
+        symbol: "Binance:BOME/USDT",
+        full_name: "Book of Meme / US dollar", // e.g. BTCE:BTCUSD
+        description: "Book of Meme / US dollar",
+        exchange: "Binance",
+        ticker: "Binance:BOME/USDT",
+        type: "crypto", // or "futures" or "bitcoin" or "forex" or "index"
+      },
     ]);
     console.log("====Search Symbols running");
   },

@@ -17,6 +17,15 @@ export default {
   getBars: async function (symbolInfo, resolution, from, to, first, limit) {
     try {
       const endpoint = `/api/candles`; // Your Next.js endpoint for fetching candle data
+      console.log(
+        "James!: in get bars ",
+        resolution,
+        symbolInfo,
+        from,
+        to,
+        first,
+        limit
+      );
       const response = await axios.get(`${apiRoot}${endpoint}`, {
         params: {
           market: transformExchangePairFormat(symbolInfo.name), // Assuming your Next.js endpoint expects a 'symbol' param
