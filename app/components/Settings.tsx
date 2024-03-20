@@ -9,7 +9,8 @@ import {
   Group,
 } from "@mantine/core";
 
-import CryptoJS from "crypto-js";
+import { ApiKeys } from "@/interfaces/ApiKeys";
+import { useExchangeManager } from "../hooks/exchangeManager";
 
 const WalletSignIn = () => {
   const [user, setUser] = useState("");
@@ -22,7 +23,7 @@ const WalletSignIn = () => {
   // Bybit
   const [bybitKey, setBybitKey] = useState("");
   const [bybitSecret, setBybitSecret] = useState("");
-
+  const [isSettingsSaved, apiKeys, encryptAndSaveKeys] = useExchangeManager();
   // Detect Rainbow Wallet Ethereum provider
   useEffect(() => {
     if (window.ethereum) {
@@ -41,47 +42,24 @@ const WalletSignIn = () => {
     }
   }, []);
 
-  const encryptAndSaveKeys = () => {
-    const keysObject = {
-      Binance: {
-        key: CryptoJS.AES.encrypt(binanceKey, "secret key phrase").toString(),
-        secret: CryptoJS.AES.encrypt(
-          binanceSecret,
-          "secret key phrase"
-        ).toString(),
-      },
-      Kraken: {
-        key: CryptoJS.AES.encrypt(krakenKey, "secret key phrase").toString(),
-        secret: CryptoJS.AES.encrypt(
-          krakenSecret,
-          "secret key phrase"
-        ).toString(),
-      },
-      Bybit: {
-        key: CryptoJS.AES.encrypt(bybitKey, "secret key phrase").toString(),
-        secret: CryptoJS.AES.encrypt(
-          bybitSecret,
-          "secret key phrase"
-        ).toString(),
-      },
-    };
-
-    localStorage.setItem("apiKeys", JSON.stringify(keysObject));
-    alert("Keys and secrets saved successfully!");
-  };
-
   if (!user) {
     return <div>Please sign in using your Ethereum wallet.</div>;
   }
 
   const handleClearKeys = () => {
     localStorage.removeItem("apiKeys"); // Clear the keys from localStorage
+    localStorage.removeItem("encryptedApiKeys"); // Clear the keys from localStorage
     alert("API keys and secrets cleared successfully!"); // Provide feedback
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    encryptAndSaveKeys();
+    //encryptAndSaveKeys();
+    encryptAndSaveKeys({
+      binance: { apiKey: binanceKey, apiSecret: binanceSecret },
+      kraken: { apiKey: krakenKey, apiSecret: krakenSecret },
+      bybit: { apiKey: bybitKey, apiSecret: bybitSecret },
+    });
   };
 
   return (

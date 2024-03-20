@@ -1,5 +1,4 @@
 import Exchange, { ExchangeName, FetchTradesReturnType } from "./Exchange";
-import { ApiKeys } from "./interfaces/ApiKeys";
 import { ExchangeConfig } from "./interfaces/ExchangeConfig";
 import { apiKeys } from "./ApiKeys";
 

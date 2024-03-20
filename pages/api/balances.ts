@@ -39,6 +39,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
+  const apiKeys: string | string[] | undefined = req.query.apiKeys;
+
   const balances: any = {};
   // Function to fetch and display balances from an exchange
   async function fetchBalances(exchange: any, config: any) {
@@ -91,25 +93,25 @@ export default async function handler(
         const marginBalance = await fetchBalances(exchange.instance, {
           type: "margin",
         });
-        console.log("marginBalance", marginBalance);
+        //console.log("marginBalance", marginBalance);
       }
       // Accumulate the total USD value from all exchanges
       portfolioTotalUsdValue += totalUsdValue;
 
-      console.log(
-        "updatedBalance.usdValue: ",
-        "For: " + exchange.name,
-        updatedBalance.usdValue
-      );
+      // console.log(
+      //   "updatedBalance.usdValue: ",
+      //   "For: " + exchange.name,
+      //   updatedBalance.usdValue
+      // );
       //Insert the updated balance and total USD value into Notion
       //   await insertOrUpdateBalanceToNotion(updatedBalance, exchange.name);
       balances[exchange.name] = updatedBalance;
       // Log a success message
-      console.log(
-        `${exchange.name} exchange processed successfully. Total USD Value: ${totalUsdValue}`
-      );
-      console.log(" ");
-      console.log("________________\n\n");
+      // console.log(
+      //   `${exchange.name} exchange processed successfully. Total USD Value: ${totalUsdValue}`
+      // );
+      // console.log(" ");
+      // console.log("________________\n\n");
     } catch (error) {
       // Log the error for the specific exchange
       console.error(`Error processing ${exchange.name} exchange:`, error);
@@ -117,7 +119,7 @@ export default async function handler(
   }
 
   // After the loop, portfolioTotalUsdValue contains the total value from all exchanges
-  console.log("Total Portfolio Value in USD:", portfolioTotalUsdValue);
+  //console.log("Total Portfolio Value in USD:", portfolioTotalUsdValue);
 
   //   savePortfolioValueToNotion(portfolioTotalUsdValue);
 

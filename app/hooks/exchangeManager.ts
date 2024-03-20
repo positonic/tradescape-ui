@@ -1,30 +1,80 @@
 // hooks/useCheckApiKeys.ts
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { ApiKeys } from "@/interfaces/ApiKeys";
 
-interface ApiKeys {
-  Binance?: string;
-  Kraken?: string;
-  Bybit?: string;
-}
-
-export const useExchangeManager = (): [boolean, ApiKeys | null] => {
+export const useExchangeManager = (): [
+  boolean,
+  ApiKeys | null,
+  (apiKeys: ApiKeys) => void
+] => {
   const [isSettingsSaved, setIsSettingsSaved] = useState(false);
-  const [apiKeys, setApiKeys] = useState<ApiKeys | null>(null);
+  const [apiKeys, setApiKeys] = useState<ApiKeys | undefined>(undefined);
 
-  useEffect(() => {
-    const storedApiKeys = localStorage.getItem("apiKeys");
-    if (storedApiKeys) {
-      const keysObject: ApiKeys = JSON.parse(storedApiKeys);
-      // Basic check to see if both keys exist
-      if (keysObject.Binance && keysObject.Kraken) {
-        setIsSettingsSaved(true);
-        setApiKeys(keysObject); // Save the API keys in state
-      } else {
-        setIsSettingsSaved(false);
-        setApiKeys(null);
+  const encryptAndSaveKeys = useCallback(async (apiKeys: ApiKeys) => {
+    if (apiKeys) {
+      const keysString = JSON.stringify(apiKeys);
+      try {
+        const response = await fetch(
+          "/api/encrypt?keysString=" + encodeURIComponent(keysString)
+        );
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const { encryptedKeys } = await response.json();
+        localStorage.setItem("encryptedApiKeys", encryptedKeys);
+        console.log("keys: Saved encrypted keys", encryptedKeys);
+        alert("Keys and secrets saved successfully!");
+      } catch (error) {
+        console.error("Failed to encrypt keys:", error);
       }
     }
   }, []);
 
-  return [isSettingsSaved, apiKeys];
+  useEffect(() => {
+    async function decryptKeys(encryptedKeys: string) {
+      try {
+        const response = await fetch(
+          "/api/decrypt?encryptedKeys=" + encodeURIComponent(encryptedKeys)
+        );
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const { decryptedKeys } = await response.json();
+
+        console.log("keys: Decrypted keys", decryptedKeys);
+        return decryptedKeys;
+      } catch (error) {
+        console.error("Failed to decrypt keys", error);
+        return null; // Return null or handle the error appropriately
+      }
+    }
+
+    async function handleApiKeys() {
+      const encryptedApiKeys = localStorage.getItem("encryptedApiKeys");
+      console.log("encryptedApiKeys", encryptedApiKeys);
+      if (encryptedApiKeys) {
+        const unencryptedApiKeys = await decryptKeys(encryptedApiKeys);
+        if (unencryptedApiKeys) {
+          // Ensure unencryptedApiKeys is not null
+          const keysObject: ApiKeys = JSON.parse(unencryptedApiKeys);
+          // Basic check to see any keys are set
+          if (keysObject.binance || keysObject.kraken || keysObject.bybit) {
+            setIsSettingsSaved(true);
+            setApiKeys(keysObject); // Save the API keys in state
+          } else {
+            setIsSettingsSaved(false);
+            setApiKeys(null);
+          }
+        } else {
+          // Handle the case where decryption fails and unencryptedApiKeys is null
+          setIsSettingsSaved(false);
+          setApiKeys(null);
+        }
+      }
+    }
+
+    handleApiKeys();
+  }, []); // Dependencies array remains the same
+
+  return [isSettingsSaved, apiKeys, encryptAndSaveKeys];
 };
