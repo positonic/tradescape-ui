@@ -12,7 +12,7 @@ const defaultWidgetProps: Partial<ChartingLibraryWidgetOptions> = {
   //const defaultWidgetProps: Partial<any> = {
   //symbol: "AAPL",
   symbol: "Binance:BTC/USD",
-  interval: "1D" as ResolutionString,
+  interval: "60" as ResolutionString,
   library_path: "/static/charting_library/",
   locale: "en",
   charts_storage_url: "https://saveload.tradingview.com",

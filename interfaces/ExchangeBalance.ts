@@ -5,4 +5,5 @@ export default interface ExchangeBalance {
   total: number;
   exchange: string;
   usdValue: number;
+  safe?: boolean;
 }

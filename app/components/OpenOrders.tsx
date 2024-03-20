@@ -1,39 +1,20 @@
-// components/OpenOrders.tsx
+// components/orders.tsx
 import { useEffect, useState } from "react";
-import { Order } from "ccxt";
+import { Order } from "@/interfaces/Order";
+import { Order as CCxtOrder } from "ccxt";
 
-const OpenOrders = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
+interface OrdersProps {
+  orders: Order[];
+}
+
+const orders: React.FC<OrdersProps> = ({ orders }) => {
   const [error, setError] = useState<string>("");
-
-  useEffect(() => {
-    const fetchOpenOrders = async () => {
-      try {
-        const response = await fetch(
-          "/api/open-orders?exchangeId=kraken&since=null"
-        );
-        if (!response.ok) throw new Error("Failed to fetch open orders.");
-        const data = await response.json();
-        if (data.error) throw new Error(data.error);
-        setOrders(data.orders);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          // If it's not an Error instance, you might want to set a generic error message
-          setError("An unexpected error occurred");
-        }
-      }
-    };
-
-    fetchOpenOrders();
-  }, []);
-
+  console.log("fetch: orderzz is ", orders);
   return (
     <div>
       <h3>Open Orders</h3>
       {error && <div className="text-red-500">{error}</div>}
-      {!error && orders.length > 0 && (
+      {!error && orders && orders.length > 0 && (
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -61,31 +42,32 @@ const OpenOrders = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {orders.map((order) => (
-              <tr key={order.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(order.timestamp).toLocaleString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {order.symbol}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {order.side}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {order.type}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {order.price}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {order.amount}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {order.filled}
-                </td>
-              </tr>
-            ))}
+            {orders &&
+              orders.map((order) => (
+                <tr key={order.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(order.time).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {order.pair}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {order.type}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {order.type}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {order.averagePrice}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {order.amount}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {0}
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       )}
@@ -93,4 +75,4 @@ const OpenOrders = () => {
   );
 };
 
-export default OpenOrders;
+export default orders;

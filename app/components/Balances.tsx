@@ -1,18 +1,15 @@
 "use client";
 import BalanceHistoryLineChart from "./BalanceHistoryLineChart";
-import ExchangeBalance from "@/interfaces/ExchangeBalance";
-import BalanceHistoryItem from "./BalanceHistoryItem";
 import { formatCurrency, colors } from "@/utils";
 import { Loader, Select } from "@mantine/core";
 import { useState, useEffect } from "react";
-import FetchUpdate from "./FetchUpdate";
-import BalanceData from "./BalanceData";
 import DonutChart from "./DonutChart";
-import OpenOrders from "./OpenOrders";
+//import OpenOrders from "./OpenOrders";
 import { Checkbox } from "@mantine/core";
 import { Order } from "@/interfaces/Order";
 import { useFetchBalances } from "../hooks/fetchBalances"; // Adjust the import path
 import { useExchangeManager } from "../hooks/exchangeManager";
+//import { useFetchOpenOrders } from "../hooks/fetchOpenOrders";
 import { useAccount } from "wagmi";
 import Signin from "./Signin";
 import Settings from "./Settings";
@@ -25,18 +22,30 @@ const exchangeSelectOptions = [
 ];
 
 const BalancesComponent: React.FC = () => {
-  const [openOrders, setOpenOrders] = useState<Order[]>([]);
   const [hideStables, setHideStables] = useState(false);
   const [selectedExchange, setSelectedExchange] = useState<string>("All");
   const [selectedCoin, setSelectedCoin] = useState<string>("All");
-  const { balances, totalBalance, history, isLoading, coins } =
+  let openOrders: Order[] = [];
+  const [isSettingsSaved, apiKeys] = useExchangeManager();
+
+  const { balances, safeBalances, totalBalance, history, isLoading, coins } =
     useFetchBalances({
       selectedExchange,
       selectedCoin,
       hideStables,
+      openOrders,
+      apiKeys,
     });
+  console.log("Balances.tsx coins: ", coins);
 
-  const [isSettingsSaved, apiKeys] = useExchangeManager();
+  // useEffect(() => {
+  //   const openOrders = useFetchOpenOrders(selectedExchange, coins, undefined);
+  //   console.log("fetch: openOrders Is ", openOrders);
+  // }, [selectedExchange, coins]);
+
+  //openOrders = useFetchOpenOrders(selectedExchange, coins, undefined);
+  console.log("fetch: openOrders Is ", openOrders);
+
   const { isConnected } = useAccount();
   if (!isConnected) {
     return <Signin />;
@@ -134,11 +143,14 @@ const BalancesComponent: React.FC = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     $USD Value
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {balances &&
-                  balances.map(({ coin, total, usdValue, exchange }) => {
+                  balances.map(({ coin, total, usdValue, exchange, safe }) => {
                     if (total > 0 && usdValue > 100) {
                       return (
                         <tr key={exchange + "-" + coin} className="mb-2">
@@ -167,6 +179,16 @@ const BalancesComponent: React.FC = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {formatCurrency(usdValue)}
                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <svg
+                              width="7"
+                              height="7"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <circle cx="3.5" cy="3.5" r="3.5" fill="red" />
+                            </svg>
+                            {safe}
+                          </td>
                         </tr>
                       );
                     }
@@ -175,7 +197,7 @@ const BalancesComponent: React.FC = () => {
               </tbody>
             </table>
           </div>
-          <OpenOrders />
+          {/* <OpenOrders orders={openOrders} apiKeys={apiKeys} /> */}
         </>
       )}
       {!isSettingsSaved && <Settings />}

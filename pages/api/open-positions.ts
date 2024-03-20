@@ -20,9 +20,11 @@ export default async function handler(
   const pair = "BTC/USDT";
 
   if (typeof exchangeIdRaw !== "string" || !isExchangeName(exchangeIdRaw)) {
-    return res
-      .status(400)
-      .json({ positions: [], error: "Invalid or missing exchangeId" });
+    return res.status(400).json({
+      positions: [],
+      error:
+        "Error fetching open positions: Error fetching open orders: Invalid or missing exchangeId",
+    });
   }
 
   const exchangeId: ExchangeName = exchangeIdRaw;

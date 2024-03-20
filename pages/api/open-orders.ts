@@ -22,7 +22,7 @@ export default async function handler(
 ) {
   //const since = req.query.since ? Number(req.query.since) : undefined;
 
-  const exchangeIdRaw = req.query.exchangeId;
+  const exchangeRaw = req.query.exchange;
 
   const pairIdRaw: string | string[] | undefined = req.query.pair;
   const pairString: string | undefined = Array.isArray(pairIdRaw)
@@ -33,13 +33,13 @@ export default async function handler(
     : pairString;
   //   const pair = "BTC/USDT";
 
-  if (typeof exchangeIdRaw !== "string" || !isExchangeName(exchangeIdRaw)) {
+  if (typeof exchangeRaw !== "string" || !isExchangeName(exchangeRaw)) {
     return res
       .status(400)
       .json({ orders: [], error: "Invalid or missing exchangeId" });
   }
 
-  const exchangeId: ExchangeName = exchangeIdRaw;
+  const exchangeId: ExchangeName = exchangeRaw;
 
   const exchange = new Exchange(
     ccxt,
