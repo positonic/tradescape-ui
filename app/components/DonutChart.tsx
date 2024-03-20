@@ -1,7 +1,6 @@
 import React from "react";
 import { DonutChart } from "@mantine/charts";
-import { formatCurrency } from "@/utils";
-import { DefaultMantineColor } from "@mantine/core";
+//import { formatCurrency } from "@/utils";
 
 // Define the shape of a single data entry
 interface Asset {

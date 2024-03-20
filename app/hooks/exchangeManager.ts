@@ -4,7 +4,7 @@ import { ApiKeys } from "@/interfaces/ApiKeys";
 
 export const useExchangeManager = (): [
   boolean,
-  ApiKeys | null,
+  ApiKeys | undefined,
   (apiKeys: ApiKeys) => void
 ] => {
   const [isSettingsSaved, setIsSettingsSaved] = useState(false);
@@ -45,7 +45,7 @@ export const useExchangeManager = (): [
         return decryptedKeys;
       } catch (error) {
         console.error("Failed to decrypt keys", error);
-        return null; // Return null or handle the error appropriately
+        return undefined; // Return null or handle the error appropriately
       }
     }
 
@@ -63,12 +63,12 @@ export const useExchangeManager = (): [
             setApiKeys(keysObject); // Save the API keys in state
           } else {
             setIsSettingsSaved(false);
-            setApiKeys(null);
+            setApiKeys(undefined);
           }
         } else {
           // Handle the case where decryption fails and unencryptedApiKeys is null
           setIsSettingsSaved(false);
-          setApiKeys(null);
+          setApiKeys(undefined);
         }
       }
     }

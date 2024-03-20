@@ -1,6 +1,5 @@
 import React from "react";
 import { LineChart } from "@mantine/charts";
-import { createSummary } from "@/utils";
 
 // Define the BalanceEntry interface
 
@@ -30,7 +29,7 @@ const generateFormattedBalancesAtSlots = (
   const result: FormattedSlotEntry[] = [];
   if (entries.length === 0) return result;
 
-  let currentTime = new Date(entries[0].timestamp);
+  const currentTime = new Date(entries[0].timestamp);
   const endTime = new Date(entries[entries.length - 1].timestamp);
 
   // Define slot offsets in hours

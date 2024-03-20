@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Chart from "@/app/components/Chart";
-import Trades from "@/app/components/Trades";
+//import Trades from "@/app/components/Trades";
 import TradingStats from "./TradeStats";
 import { calculateTradingStatistics } from "@/Stats";
 import Orders from "./Orders";
@@ -10,12 +10,23 @@ import { useSearchParams } from "next/navigation";
 import { Order } from "@/interfaces/Order";
 import { Trade } from "@/interfaces/Trade";
 import { parseExchangePair } from "@/utils";
+import { useFetchBalances } from "../hooks/fetchBalances";
+import { useExchangeManager } from "../hooks/exchangeManager";
 
 export default function Market({ market }: { market: string }) {
   const searchParams = useSearchParams();
-
+  const [isSettingsSaved, apiKeys] = useExchangeManager();
   const since = searchParams ? searchParams.get("since") : undefined;
 
+  const { balances, safeBalances, totalBalance, history, isLoading, coins } =
+    useFetchBalances({
+      selectedExchange: "kraken",
+      selectedCoin: "sol",
+      hideStables: true,
+      openOrders: [],
+      apiKeys,
+    });
+  console.log("Balances is ", balances);
   const [positions, setPositions] = useState([]);
   const [trades, setTrades] = useState<Trade[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);

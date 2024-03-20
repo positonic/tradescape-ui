@@ -2,12 +2,12 @@
 import BalanceHistoryLineChart from "./BalanceHistoryLineChart";
 import { formatCurrency, colors } from "@/utils";
 import { Loader, Select } from "@mantine/core";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import DonutChart from "./DonutChart";
 //import OpenOrders from "./OpenOrders";
 import { Checkbox } from "@mantine/core";
 import { Order } from "@/interfaces/Order";
-import { useFetchBalances } from "../hooks/fetchBalances"; // Adjust the import path
+import { useFetchBalances } from "../hooks/fetchBalances";
 import { useExchangeManager } from "../hooks/exchangeManager";
 //import { useFetchOpenOrders } from "../hooks/fetchOpenOrders";
 import { useAccount } from "wagmi";
@@ -25,10 +25,10 @@ const BalancesComponent: React.FC = () => {
   const [hideStables, setHideStables] = useState(false);
   const [selectedExchange, setSelectedExchange] = useState<string>("All");
   const [selectedCoin, setSelectedCoin] = useState<string>("All");
-  let openOrders: Order[] = [];
+  const openOrders: Order[] = [];
   const [isSettingsSaved, apiKeys] = useExchangeManager();
 
-  const { balances, safeBalances, totalBalance, history, isLoading, coins } =
+  const { balances, totalBalance, history, isLoading, coins } =
     useFetchBalances({
       selectedExchange,
       selectedCoin,
