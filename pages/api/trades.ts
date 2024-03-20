@@ -6,7 +6,11 @@ import Exchange, {
   aggregateTrades,
 } from "@/Exchange";
 
-import { sortDescending, parseExchangePair } from "@/utils";
+import {
+  sortDescending,
+  parseExchangePair,
+  parseQuoteBaseFromPair,
+} from "@/utils";
 
 // Define the interface for the Trade array
 export type FetchTradesReturnType = Record<string, Trade>;
@@ -28,6 +32,7 @@ import { ExchangeConfig } from "@/interfaces/ExchangeConfig";
 import { Trade } from "@/interfaces/Trade";
 import { Order } from "@/interfaces/Order";
 import { TradeResponseData } from "./TradeResponseData";
+import { getExchangeCoinPairs } from "@/exchangeCoinPairs";
 
 export default async function handler(
   req: NextApiRequest,
@@ -36,29 +41,26 @@ export default async function handler(
   //http://localhost:3000/api/trades?exchangeId=binance&since=null
 
   //const pair = "BTC/USDT";
-  const market = req.query.market;
-  let pair = "";
-  if (market) {
-    ({ pair } = parseExchangePair(market as string));
-  }
+  const pair = req.query.pair as string;
 
   const since = req.query.since ? Number(req.query.since) : undefined;
-  // Attempt to retrieve exchangeId from the query, with a fallback
-  const exchangeIdRaw: string | string[] | undefined = req.query.exchangeId;
-  const exchangeId: string | undefined = Array.isArray(exchangeIdRaw)
-    ? exchangeIdRaw[0]
-    : exchangeIdRaw;
 
-  if (exchangeId && !isExchangeName(exchangeId)) {
+  const exchange: string | undefined = req.query.exchangeId as string;
+
+  if (
+    !since &&
+    (!pair || !exchange || (exchange && !isExchangeName(exchange)))
+  ) {
     return res.status(400).json({
       trades: [],
       orders: [],
       positions: [],
-      error: "Invalid or missing exchangeId",
+      error:
+        "Error: api/trades: If you don't specify an exchnage and pair, you must specify a since parameter",
     });
   }
 
-  const config: ExchangeConfig[] = getExchangeConfig(exchangeId);
+  const config: ExchangeConfig[] = getExchangeConfig(exchange);
 
   const exchanges: Record<string, Exchange> = initExchanges();
   console.log("exchanges is ", exchanges);
@@ -66,9 +68,13 @@ export default async function handler(
 
   let trades: Trade[] = [];
 
-  const pairs = pair ? [pair] : undefined;
+  const { base, quote } = parseQuoteBaseFromPair(pair);
+  const pairs = getExchangeCoinPairs(exchange, base, undefined);
+  const pairsList = pair ? [pair] : undefined;
+  console.log("pairs is ", pairs);
+  console.log("exchangeId is ", exchange);
   try {
-    trades = await tradeManager.getAllTrades(pairs, since);
+    trades = await tradeManager.getAllTrades(pairsList, since);
 
     console.log("trades is ", trades);
 
@@ -86,7 +92,7 @@ export default async function handler(
     };
     res.status(200).json(response);
   } catch (error) {
-    console.error("Failed to fetch candle data:", error);
+    console.error("Failed to fetch trades:", error);
     res.status(500).json({
       trades: [],
       orders: [],

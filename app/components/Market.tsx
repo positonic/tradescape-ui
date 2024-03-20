@@ -9,6 +9,7 @@ import Positions from "./Positions";
 import { useSearchParams } from "next/navigation";
 import { Order } from "@/interfaces/Order";
 import { Trade } from "@/interfaces/Trade";
+import { parseExchangePair } from "@/utils";
 
 export default function Market({ market }: { market: string }) {
   const searchParams = useSearchParams();
@@ -19,7 +20,8 @@ export default function Market({ market }: { market: string }) {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState("");
-
+  console.log("market is ", market);
+  const { pair, exchange } = parseExchangePair(market as string);
   const statistics = calculateTradingStatistics(positions);
   useEffect(() => {
     const fetchTrades = async () => {
@@ -27,8 +29,8 @@ export default function Market({ market }: { market: string }) {
         console.log("fetching trades for ", market);
         // Update the URL to match your Next.js API route
         const response = await fetch(
-          `/api/trades?exchangeId=binance&market=${encodeURIComponent(
-            market
+          `/api/trades?exchangeId=${exchange}&pair=${encodeURIComponent(
+            pair
           )}&since=${since}`
         );
         const data = await response.json();

@@ -18,17 +18,36 @@ export function formatDateTime(timestamp: number): string {
 export function parseExchangePair(input: string): {
   exchange: string;
   pair: string;
+  base: string;
+  quote: string;
 } {
   // Split the input string into exchange and pair parts
   const [exchangePart, pairPart] = input.split("-");
 
   // Capitalize the first letter of the exchange part
-  const exchange = exchangePart.charAt(0).toUpperCase() + exchangePart.slice(1);
+  const exchange = exchangePart.slice(0);
 
   // Replace underscores with slashes and convert the pair part to uppercase
   const pair = pairPart.replace("_", "/").toUpperCase();
 
-  return { exchange, pair };
+  const base = pair.split("/")[0];
+  const quote = pair.split("/")[1];
+
+  return { exchange, pair, base, quote };
+}
+
+/**
+ * BTC/USDT - base is BTC, quote is USDT
+ * @param pair
+ * @returns
+ */
+export function parseQuoteBaseFromPair(pair: string): {
+  base: string;
+  quote: string;
+} {
+  const base = pair.split("/")[0];
+  const quote = pair.split("/")[1];
+  return { base, quote };
 }
 
 /**
@@ -110,4 +129,69 @@ export function getStartOfYesterdayTimestamp(): number {
   ); // Set time to 00:00:00.000
   const timestamp = startOfDay.getTime(); // Get the timestamp in milliseconds since the Unix Epoch
   return timestamp;
+}
+interface BalanceEntry {
+  timestamp: number;
+  totalBalance: number;
+}
+
+export function createSummary(entries: BalanceEntry[]): BalanceEntry[] {
+  // Sort entries by timestamp to ensure they are processed in order
+  const sortedEntries = entries.sort((a, b) => a.timestamp - b.timestamp);
+
+  // Prepare a result array to hold the closest entries for each 6-hour segment
+  const result: BalanceEntry[] = [];
+
+  // Define the four 6-hour segments in a day
+  const segments = [0, 6, 12, 18];
+
+  // Convert each segment into milliseconds for comparison
+  const segmentTimes = segments.map((segment) => segment * 3600 * 1000);
+  console.log("segmentTimes is ", segmentTimes);
+  sortedEntries.forEach((entry) => {
+    // Convert timestamp to a date object
+    const date = new Date(entry.timestamp);
+    const startOfDay = new Date(date);
+    startOfDay.setUTCHours(0, 0, 0, 0); // Reset to start of the day in UTC
+
+    // Find the difference between the entry's time and the start of the day
+    const diff = date.getTime() - startOfDay.getTime();
+
+    // Determine the closest segment time before the entry's time
+    const closestSegmentTime = segmentTimes.reduce((prev, curr) => {
+      return curr <= diff && curr > prev ? curr : prev;
+    }, 0);
+
+    // Calculate the timestamp for the closest segment start
+    const segmentTimestamp = startOfDay.getTime() + closestSegmentTime;
+
+    // Check if we already have an entry for this segment
+    const existingEntryIndex = result.findIndex(
+      (e) => e.timestamp === segmentTimestamp
+    );
+
+    if (existingEntryIndex === -1) {
+      // If no entry exists for this segment yet, add the current entry
+      result.push({
+        timestamp: segmentTimestamp,
+        totalBalance: entry.totalBalance,
+      });
+    } else {
+      // If an entry exists, determine which one is closer to the segment start
+      const existingEntry = result[existingEntryIndex];
+      const existingDiff = Math.abs(existingEntry.timestamp - segmentTimestamp);
+      const currentDiff = Math.abs(entry.timestamp - segmentTimestamp);
+
+      if (currentDiff < existingDiff) {
+        // If the current entry is closer, replace the existing entry
+        result[existingEntryIndex] = {
+          timestamp: segmentTimestamp,
+          totalBalance: entry.totalBalance,
+        };
+      }
+    }
+  });
+
+  // Return the filtered and mapped entries
+  return result;
 }

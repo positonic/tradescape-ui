@@ -4,6 +4,8 @@ import FetchUpdate from "../components/FetchUpdate"; // Adjust the import path
 import BalanceData from "../components/BalanceData"; // Adjust the import path
 import ExchangeBalance from "@/interfaces/ExchangeBalance"; // Adjust the import path
 import BalanceHistoryItem from "../components/BalanceHistoryItem"; // Adjust the import path
+import { Order } from "@/interfaces/Order"; // Adjust the import path
+import { ApiKeys } from "@/interfaces/ApiKeys";
 
 const balanceHistoryKey = "balanceHistory";
 const localStorageKey = "balancesData";
@@ -26,7 +28,9 @@ const saveBalanceHistory = (newTotalBalance: number): BalanceHistoryItem[] => {
 
   return history;
 };
-const fetchAndUpdateBalances = async (): Promise<FetchUpdate> => {
+const fetchAndUpdateBalances = async (
+  apiKeys: ApiKeys | undefined
+): Promise<FetchUpdate> => {
   console.log("fetchAndUpdateBalances > Fetching new data", new Date());
   const storedDataJSON = localStorage.getItem(localStorageKey);
   const historyJSON = localStorage.getItem(balanceHistoryKey);
@@ -68,7 +72,17 @@ const fetchAndUpdateBalances = async (): Promise<FetchUpdate> => {
   if (storedData && storedData.timestamp < fiveMinutesAgo) {
     try {
       console.log("fetch: doing new fetch");
-      const response = await fetch("/api/balances");
+      //const response = await fetch("/api/balances");
+      const response = await fetch("/api/balances", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          apiKeys,
+          // Include other necessary body parameters here
+        }),
+      });
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -103,14 +117,21 @@ interface UseFetchBalancesProps {
   selectedExchange: string;
   selectedCoin: string;
   hideStables: boolean;
+  openOrders: Order[];
+  apiKeys: ApiKeys | undefined;
 }
 
 export const useFetchBalances = ({
   selectedExchange,
   selectedCoin,
   hideStables,
+  openOrders,
+  apiKeys,
 }: UseFetchBalancesProps) => {
   const [balances, setBalances] = useState<ExchangeBalance[] | null>(null);
+  const [safeBalances, setSafeBalances] = useState<ExchangeBalance[] | null>(
+    null
+  );
   const [totalBalance, setTotalBalance] = useState<number>(0);
   const [history, setHistory] = useState<BalanceHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -119,7 +140,7 @@ export const useFetchBalances = ({
 
   useEffect(() => {
     const fetchData = () => {
-      fetchAndUpdateBalances()
+      fetchAndUpdateBalances(apiKeys)
         .then(({ balances, totalBalance, history }) => {
           console.log(
             `fetch: fetchAndUpdateBalances filter for  ${selectedExchange}`
@@ -178,5 +199,5 @@ export const useFetchBalances = ({
     return () => clearInterval(intervalId);
   }, [selectedExchange, selectedCoin, hideStables]);
 
-  return { balances, totalBalance, history, isLoading, coins };
+  return { balances, safeBalances, totalBalance, history, isLoading, coins };
 };
