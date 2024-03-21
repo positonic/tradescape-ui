@@ -78,6 +78,7 @@ const CryptoPieChart: React.FC<Props> = ({ assets }: { assets: any[] }) => {
   const data = aggregateDataByCoin(assets);
 
   const addColorToCryptoItem = (item: CryptoAsset): CryptoAsset => {
+    console.log("crypto: item is ", item);
     return {
       ...item,
       color: cryptoColors[item.name] || "rgb(255, 255, 255)", // Default color if not found
@@ -96,10 +97,6 @@ const CryptoPieChart: React.FC<Props> = ({ assets }: { assets: any[] }) => {
         tooltipDataSource="segment"
         withTooltip
         data={dataWithColors}
-        // label={(data: any) =>
-        //   `${data.label} (${formatCurrency(data.value)} USD)`
-        // }
-
         size={300}
       />
     </>
