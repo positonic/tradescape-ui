@@ -14,6 +14,8 @@ const reformatData = (data: Balances): ExchangeBalance[] => {
       const coinUsdValue =
         details.usdValue[coin as keyof typeof details.usdValue];
       if (coin !== "usdValue" && coinUsdValue !== undefined) {
+        const key = coin.toLowerCase();
+
         reformattedArray.push({
           coin,
           free: coinDetail.free,
@@ -93,7 +95,6 @@ export default async function handler(
         const marginBalance = await fetchBalances(exchange.instance, {
           type: "margin",
         });
-        //console.log("marginBalance", marginBalance);
       }
       // Accumulate the total USD value from all exchanges
       portfolioTotalUsdValue += totalUsdValue;
