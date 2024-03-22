@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import {
   ChartingLibraryWidgetOptions,
   ResolutionString,
@@ -27,7 +28,7 @@ const TVChartContainer = dynamic(
   { ssr: false }
 );
 
-export default function Chart({
+export default React.memo(function Chart({
   market,
   trades,
 }: {
@@ -57,4 +58,4 @@ export default function Chart({
       )}
     </div>
   );
-}
+});
