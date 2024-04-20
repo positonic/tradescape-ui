@@ -11,7 +11,7 @@ export interface Order {
   highestPrice: number;
   lowestPrice: number;
   averagePrice: number;
-  exchange: string;
+  exchange: string | undefined; // Have to allow undefined due to ccxt
   trades: Trade[]; // Add an array of trades
   orderId?: string;
   status?: string;

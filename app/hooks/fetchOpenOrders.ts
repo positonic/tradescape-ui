@@ -56,25 +56,26 @@ export const useFetchOpenOrders = (
           const pairSymbol =
             skipCoin.indexOf(coin) === -1 ? `${coin}/USDT` : "";
           if (pairSymbol) {
-            const fetchedOpenOrders = await fetchOpenOrders(
-              exchange,
-              pairSymbol
-            );
-            console.log(
-              "fetch: fetchedOpenOrders ",
-              pairSymbol,
-              fetchedOpenOrders
-            );
-            if (fetchedOpenOrders && fetchedOpenOrders.length)
+            // const fetchedOpenOrders = await fetchOpenOrders(
+            //   exchange,
+            //   pairSymbol
+            // );
+            // console.log(
+            //   "fetch: fetchedOpenOrders ",
+            //   pairSymbol,
+            //   fetchedOpenOrders
+            // );
+            if (openOrders && openOrders.length)
               setOpenOrdersPerPair((prevState) => ({
                 ...prevState,
-                [coin]: fetchedOpenOrders,
+                [coin]: openOrders,
               }));
           }
         }
       } else {
-        const pairSymbol = skipCoin.indexOf(pair) === -1 ? `${pair}/USDT` : "";
-        await fetchOpenOrders(exchange, pairSymbol);
+        console.log("fetchOpenOrders or openOrders?");
+        // const pairSymbol = skipCoin.indexOf(pair) === -1 ? `${pair}/USDT` : "";
+        // await fetchOpenOrders(exchange, pairSymbol);
       }
     };
     fetchAllOpenOrders(exchange, coins);

@@ -1,15 +1,16 @@
 // components/orders.tsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Order } from "@/interfaces/Order";
-import { Order as CCxtOrder } from "ccxt";
+// import { Order as CCxtOrder } from "ccxt";
+import { ApiKeys } from "@/interfaces/ApiKeys";
 
 interface OrdersProps {
   orders: Order[];
-  apiKeys: 
+  apiKeys: ApiKeys;
 }
 
 const orders: React.FC<OrdersProps> = ({ orders }) => {
-  const [error, setError] = useState<string>("");
+  const [error] = useState<string>("");
   console.log("fetch: orderzz is ", orders);
   return (
     <div>

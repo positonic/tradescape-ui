@@ -43,7 +43,7 @@ export interface Position {
   profitLoss: number; // Profit or loss from the position
   orders: Order[]; // Array of orders that make up the position
   pair: string;
-  exchange: string;
+  exchange: string | undefined; // Have to allow undefined due to ccxt
   price: number;
   quantity: number;
   duration: number; // in hours
@@ -1414,7 +1414,7 @@ export default class Exchange {
 // const ethPositions = createPositionsFromOrders(ethOrdersThisYear, "binance");
 // console.log("arbPositions", ethPositions);
 
-export type ExchangeName = "kraken" | "binance" | "bybit" | "bitmex" | "ftx";
+export type ExchangeName = "kraken" | "binance" | "bybit";
 
 // Utility type guard to check if a string is a valid ExchangeName
 export function isExchangeName(value: string): value is ExchangeName {

@@ -1,10 +1,10 @@
 // hooks/useFetchBalances.ts
 import { useState, useEffect } from "react";
-import FetchUpdate from "../components/FetchUpdate"; // Adjust the import path
-import BalanceData from "../components/BalanceData"; // Adjust the import path
-import ExchangeBalance from "@/interfaces/ExchangeBalance"; // Adjust the import path
-import BalanceHistoryItem from "../components/BalanceHistoryItem"; // Adjust the import path
-import { Order } from "@/interfaces/Order"; // Adjust the import path
+import FetchUpdate from "../components/FetchUpdate";
+import BalanceData from "../components/BalanceData";
+import ExchangeBalance from "@/interfaces/ExchangeBalance";
+import BalanceHistoryItem from "../components/BalanceHistoryItem";
+import { Order } from "@/interfaces/Order";
 import { ApiKeys } from "@/interfaces/ApiKeys";
 
 const balanceHistoryKey = "balanceHistory";
@@ -130,7 +130,7 @@ export const useFetchBalances = ({
   selectedCoin,
   hideStables,
   hideMajors,
-  openOrders,
+  // openOrders,
   apiKeys,
 }: UseFetchBalancesProps) => {
   const [balances, setBalances] = useState<ExchangeBalance[] | null>(null);
