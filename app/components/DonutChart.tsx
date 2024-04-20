@@ -50,6 +50,8 @@ const cryptoColors: CryptoColors = {
   AVAX: "#e32636",
   USDT: "#07c160",
   USDC: "#ffffff",
+  INJ: "#028DF1",
+  FLOKI: "#F7972C",
 };
 // A utility function to aggregate data by coin
 const aggregateDataByCoin = (assets: Asset[]) => {
