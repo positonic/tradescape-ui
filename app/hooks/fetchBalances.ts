@@ -69,7 +69,10 @@ const fetchAndUpdateBalances = async (
   } else {
     console.log("fetch: no storedData");
   }
-  if (storedData && storedData.timestamp < fiveMinutesAgo) {
+  if (
+    storedData === null ||
+    (storedData && storedData.timestamp < fiveMinutesAgo)
+  ) {
     try {
       console.log("fetch: doing new fetch");
       //const response = await fetch("/api/balances");
@@ -117,6 +120,7 @@ interface UseFetchBalancesProps {
   selectedExchange: string;
   selectedCoin: string;
   hideStables: boolean;
+  hideMajors: boolean;
   openOrders: Order[];
   apiKeys: ApiKeys | undefined;
 }
@@ -125,6 +129,7 @@ export const useFetchBalances = ({
   selectedExchange,
   selectedCoin,
   hideStables,
+  hideMajors,
   openOrders,
   apiKeys,
 }: UseFetchBalancesProps) => {
@@ -133,6 +138,7 @@ export const useFetchBalances = ({
     null
   );
   const [totalBalance, setTotalBalance] = useState<number>(0);
+  const [amountInStables, setAmountInStables] = useState<number>(0);
   const [history, setHistory] = useState<BalanceHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
@@ -173,7 +179,19 @@ export const useFetchBalances = ({
               : filteredExchangeBalances.filter(
                   (balance) => balance.coin === selectedCoin
                 );
+          const amountInStables = filteredExchangeCoinBalances
+            .filter(
+              (balance) =>
+                balance.coin === "USDT" ||
+                balance.coin === "USD" ||
+                balance.coin === "USDC"
+            )
+            .reduce(
+              (accumulator, balance) => accumulator + balance.usdValue,
+              0
+            );
 
+          console.log("hideStables is ", hideStables);
           const filteredStables = hideStables
             ? filteredExchangeCoinBalances.filter(
                 (balance) =>
@@ -182,7 +200,17 @@ export const useFetchBalances = ({
                   balance.coin !== "USDC"
               )
             : filteredExchangeCoinBalances;
+          const filteredHideMajors = hideMajors
+            ? filteredExchangeCoinBalances.filter(
+                (balance) =>
+                  balance.coin !== "BTC" &&
+                  balance.coin !== "ETH" &&
+                  balance.coin !== "SOL"
+              )
+            : filteredExchangeCoinBalances;
+          console.log("filteredStables.sort() ", filteredHideMajors.sort());
           setBalances(filteredStables.sort());
+          setAmountInStables(amountInStables);
           setTotalBalance(totalBalance);
           setHistory(history);
           setIsLoading(false);
@@ -199,5 +227,13 @@ export const useFetchBalances = ({
     return () => clearInterval(intervalId);
   }, [selectedExchange, selectedCoin, hideStables]);
 
-  return { balances, safeBalances, totalBalance, history, isLoading, coins };
+  return {
+    balances,
+    safeBalances,
+    totalBalance,
+    amountInStables,
+    history,
+    isLoading,
+    coins,
+  };
 };

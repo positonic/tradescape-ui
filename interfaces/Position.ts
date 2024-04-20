@@ -10,4 +10,5 @@ export default interface Position {
   TotalCostBuy: number;
   TotalCostSell: number;
   Orders: Order[];
+  amount: number;
 }

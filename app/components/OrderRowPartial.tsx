@@ -15,14 +15,14 @@ export default function OrderRowPartial({
         {new Date(order.date).toLocaleString()}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
       <td
         className={`px-6 py-4 whitespace-nowrap text-sm ${
           order.type === "buy" ? "text-green-500" : "text-red-500"
         }`}
       >
-        {order.type}
+        {order.type} {Math.round(order.amount)} {order.pair.split("/")[0]}
       </td>
+
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
         {formatCurrency(order.averagePrice)}
       </td>

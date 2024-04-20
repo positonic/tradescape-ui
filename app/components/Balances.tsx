@@ -1,6 +1,6 @@
 "use client";
 import BalanceHistoryLineChart from "./BalanceHistoryLineChart";
-import { formatCurrency, colors } from "@/utils";
+import { formatCurrency, cryptoColors } from "@/utils";
 import { Loader, Select } from "@mantine/core";
 import { useState } from "react";
 import DonutChart from "./DonutChart";
@@ -23,16 +23,24 @@ const exchangeSelectOptions = [
 
 const BalancesComponent: React.FC = () => {
   const [hideStables, setHideStables] = useState(false);
+  const [hideMajors, setHideMajors] = useState(false);
   const [selectedExchange, setSelectedExchange] = useState<string>("All");
   const [selectedCoin, setSelectedCoin] = useState<string>("All");
+
+  const fallbackUrl = "/img/crypto-logos/PNG/ada.png";
+
+  function addDefaultImage(ev: any) {
+    ev.target.src = fallbackUrl;
+  }
   const openOrders: Order[] = [];
   const [isSettingsSaved, apiKeys] = useExchangeManager();
 
-  const { balances, totalBalance, history, isLoading, coins } =
+  const { balances, totalBalance, amountInStables, history, isLoading, coins } =
     useFetchBalances({
       selectedExchange,
       selectedCoin,
       hideStables,
+      hideMajors,
       openOrders,
       apiKeys,
     });
@@ -70,6 +78,7 @@ const BalancesComponent: React.FC = () => {
   const balanceTotal = balances
     ? balances.reduce((accumulator, item) => accumulator + item.usdValue, 0)
     : 0;
+  console.log("balancez is ", balances);
   return (
     <div className="p-4">
       {isSettingsSaved && (
@@ -79,10 +88,19 @@ const BalancesComponent: React.FC = () => {
               {formatCurrency(totalBalance)}
             </span>
           </div>
+          <div className="flex justify-end">
+            <span className="text-1xl font-semibold">
+              {Math.round(
+                ((totalBalance - amountInStables) / totalBalance) * 100
+              )}
+              % allocated
+            </span>
+          </div>
+
           <div className="flex">
             <div className="w-[400px] p-4 text-white">
-              {balances && colors && (
-                <DonutChart assets={balances} colors={colors} />
+              {balances && cryptoColors && (
+                <DonutChart assets={balances} colors={cryptoColors} />
               )}
             </div>
             <div className="flex-grow p-4 text-white">
@@ -114,6 +132,15 @@ const BalancesComponent: React.FC = () => {
                   checked={hideStables}
                   onChange={(event) =>
                     setHideStables(event.currentTarget.checked)
+                  }
+                />
+              </div>
+              <div className="flex-grow p-4 text-white">
+                <Checkbox
+                  label="Hide majors"
+                  checked={hideMajors}
+                  onChange={(event) =>
+                    setHideMajors(event.currentTarget.checked)
                   }
                 />
               </div>
@@ -150,50 +177,47 @@ const BalancesComponent: React.FC = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {balances &&
-                  balances.map(({ coin, total, usdValue, exchange, safe }) => {
-                    if (total > 0 && usdValue > 100) {
-                      return (
-                        <tr key={exchange + "-" + coin} className="mb-2">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <svg
-                              className="inline-block"
-                              width="20"
-                              height="20"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <circle
-                                cx="10"
-                                cy="10"
-                                r="5"
-                                fill={colors[coin]}
-                              />
-                            </svg>
-                            <span className="inline-block">{coin}</span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {exchange}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {total}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {formatCurrency(usdValue)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <svg
-                              width="7"
-                              height="7"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <circle cx="3.5" cy="3.5" r="3.5" fill="red" />
-                            </svg>
-                            {safe}
-                          </td>
-                        </tr>
-                      );
+                  balances.map(
+                    ({ coin, total, usdValue, exchange, safe, logo }) => {
+                      if (total > 0 && usdValue > 100) {
+                        return (
+                          <tr key={exchange + "-" + coin} className="mb-2">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <div className="flex items-center space-x-2">
+                                <img
+                                  onError={addDefaultImage}
+                                  src={`/img/crypto-logos/PNG/${coin.toLowerCase()}.png`}
+                                  className="w-6 h-6"
+                                />
+
+                                <span className="inline-block">{coin}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {exchange}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {total}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {formatCurrency(usdValue)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <svg
+                                width="7"
+                                height="7"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <circle cx="3.5" cy="3.5" r="3.5" fill="red" />
+                              </svg>
+                              {safe}
+                            </td>
+                          </tr>
+                        );
+                      }
+                      return null;
                     }
-                    return null;
-                  })}
+                  )}
               </tbody>
             </table>
           </div>

@@ -75,7 +75,7 @@ export function formatCurrency(amount: number): string {
 interface ColorMap {
   [key: string]: string;
 }
-export const colors: ColorMap = {
+export const cryptoColors: ColorMap = {
   BTC: "rgb(247, 147, 26)",
   BLUR: "rgb(113, 87, 194)",
   MATIC: "rgb(130, 71, 229)",
@@ -104,6 +104,7 @@ export const colors: ColorMap = {
   AVAX: "rgb(227, 38, 54)",
   USDT: "rgb(7, 193, 96)",
   USDC: "rgb(255, 255, 255)",
+  SOL: "#24AEA9",
 };
 
 export const sortDescending = (a: any, b: any) => b.time - a.time;
@@ -127,6 +128,12 @@ export function getStartOfYesterdayTimestamp(): number {
     now.getMonth(),
     now.getDate() - 1
   ); // Set time to 00:00:00.000
+  const timestamp = startOfDay.getTime(); // Get the timestamp in milliseconds since the Unix Epoch
+  return timestamp;
+}
+export function getStartOfTodayTimestamp(): number {
+  const now = new Date(); // Get the current date and time
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Set time to 00:00:00.000
   const timestamp = startOfDay.getTime(); // Get the timestamp in milliseconds since the Unix Epoch
   return timestamp;
 }

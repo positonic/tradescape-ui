@@ -15,25 +15,71 @@ import {
 // Define the interface for the Trade array
 export type FetchTradesReturnType = Record<string, Trade>;
 
-interface Position {
-  Date: string;
-  ProfitLoss: number;
-  Duration: string;
-  PositionType: "long" | "short";
-  AverageEntryPrice: number;
-  AverageExitPrice: number;
-  TotalCostBuy: number;
-  TotalCostSell: number;
-  Orders: Order[];
-}
-
 import { TradeManager, getExchangeConfig } from "@/TradeManager";
 import { ExchangeConfig } from "@/interfaces/ExchangeConfig";
 import { Trade } from "@/interfaces/Trade";
 import { Order } from "@/interfaces/Order";
 import { TradeResponseData } from "./TradeResponseData";
 import { getExchangeCoinPairs } from "@/exchangeCoinPairs";
+import { matchOrdersToPositions } from "@/PositionManager";
 
+const rotkiUrl =
+  "http://127.0.0.1:4242/api/1/trades?limit=10&base_asset=SOL-2&only_cache=true";
+const rotkiCoins = {
+  SOL: "SOL-2",
+};
+interface RotkiTradeInput {
+  result: {
+    entries: Array<{
+      entry: RotkiTrade;
+      ignored_in_accounting: boolean;
+    }>;
+  };
+}
+interface RotkiTrade {
+  timestamp: number;
+  location: string;
+  base_asset: string;
+  quote_asset: string;
+  trade_type: string;
+  amount: string;
+  rate: string;
+  fee: string;
+  fee_currency: string;
+  link: string;
+  notes: null | string;
+  trade_id: string;
+}
+interface TradeOutput {
+  trades: Trade[];
+}
+function mapTrades(input: RotkiTradeInput): TradeOutput {
+  return {
+    trades: input.result.entries.map((entry) => ({
+      id: entry.entry.trade_id,
+      ordertxid: entry.entry.link,
+      pair: `${entry.entry.base_asset.replace("-2", "")}/${
+        entry.entry.quote_asset
+      }`,
+      time: entry.entry.timestamp * 1000, // Convert to milliseconds
+      type: entry.entry.trade_type,
+      ordertype: "stop market", // Assuming a fixed value as it's not provided in the input
+      price: entry.entry.rate,
+      cost: (
+        parseFloat(entry.entry.amount) * parseFloat(entry.entry.rate)
+      ).toString(),
+      fee: entry.entry.fee,
+      vol: parseFloat(entry.entry.amount),
+      margin: "", // Assuming empty as it's not provided in the input
+      leverage: "", // Assuming empty as it's not provided in the input
+      misc: "", // Assuming empty as it's not provided in the input
+      exchange:
+        entry.entry.location.charAt(0).toUpperCase() +
+        entry.entry.location.slice(1),
+      date: new Date(entry.entry.timestamp * 1000),
+    })),
+  };
+}
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<TradeResponseData>
@@ -42,7 +88,40 @@ export default async function handler(
 
   //const pair = "BTC/USDT";
   const pair = req.query.pair as string;
+  const rotki = req.query.rotki as string;
 
+  console.log("rotki url ", rotkiUrl);
+  if (rotki) {
+    try {
+      const rotkiCoin =
+        rotkiCoins[pair.split("/")[0] as keyof typeof rotkiCoins];
+      const response = await fetch(rotkiUrl);
+      console.log("Rotki response", response);
+      const rotkiTrades: RotkiTradeInput = await response.json();
+      const trades = mapTrades(rotkiTrades).trades;
+      const orders: Order[] = aggregateTrades(trades).sort(sortDescending);
+      const positions = matchOrdersToPositions(orders);
+      console.log("Rotki data", trades);
+
+      res.status(200).json({
+        trades: trades,
+        positions,
+        orders: orders,
+        error: "",
+        rotki: true,
+      });
+    } catch (error) {
+      console.error("Failed to fetch trades:", error);
+      res.status(500).json({
+        trades: [],
+        orders: [],
+        positions: [],
+        error: "Failed to fetch TRADES",
+      });
+    }
+  } else {
+    console.log("not rotki");
+  }
   const since = req.query.since ? Number(req.query.since) : undefined;
 
   const exchange: string | undefined = req.query.exchangeId as string;
@@ -63,13 +142,23 @@ export default async function handler(
   const config: ExchangeConfig[] = getExchangeConfig(exchange);
 
   const exchanges: Record<string, Exchange> = initExchanges();
-  console.log("exchanges is ", exchanges);
+
   const tradeManager = new TradeManager(config, exchanges);
 
   let trades: Trade[] = [];
 
   const { base, quote } = parseQuoteBaseFromPair(pair);
   const pairs = getExchangeCoinPairs(exchange, base, undefined);
+  // const pairs = [
+  //   "MSOL/EUR",
+  //   "MSOL/USD",
+  //   "SOL/BTC",
+  //   "SOL/ETH",
+  //   "SOL/EUR",
+  //   "SOL/GBP",
+  //   "SOL/USD",
+  //   "SOL/USDT",
+  // ];
   const pairsList = pair ? [pair] : undefined;
   console.log("pairs is ", pairs);
   console.log("exchangeId is ", exchange);
@@ -103,55 +192,5 @@ export default async function handler(
 }
 
 // Helper to format duration
-const formatDuration = (durationInMs: number): string => {
-  const durationInDays = durationInMs / (1000 * 60 * 60 * 24);
-  if (durationInDays < 1) return "< 1 day";
-  if (durationInDays < 2) return "> 1 day";
-  if (durationInDays < 3) return "> 2 days";
-  if (durationInDays < 4) return "> 3 days";
-  if (durationInDays < 7) return "> 7 days";
-  if (durationInDays < 30) return "> 1 week";
-  return "> 1 month";
-};
 
 // Parses orders and creates positions
-const matchOrdersToPositions = (orders: Order[]): Position[] => {
-  const buyOrders = orders.filter((order) => order.type === "buy");
-  const sellOrders = orders.filter((order) => order.type === "sell");
-  const positions: Position[] = [];
-
-  // Simplistic approach: match each buy with the closest sell in time
-  for (const buy of buyOrders) {
-    const matchingSell = sellOrders.reduce((prev, current) => {
-      return prev === null ||
-        Math.abs(current.time - buy.time) < Math.abs(prev.time - buy.time)
-        ? current
-        : prev;
-    }, null as Order | null);
-
-    if (matchingSell) {
-      const duration = matchingSell.time - buy.time;
-      positions.push({
-        Date: new Date(buy.time).toISOString(),
-        // ProfitLoss:
-        //   matchingSell.totalCost - matchingSell.fee - (buy.totalCost + buy.fee),
-        //ProfitLoss: matchingSell.totalCost - (buy.totalCost + buy.fee),
-        ProfitLoss: matchingSell.totalCost - buy.totalCost,
-        Duration: formatDuration(duration),
-        PositionType: buy.time < matchingSell.time ? "long" : "short",
-        AverageEntryPrice: buy.averagePrice,
-        AverageExitPrice: matchingSell.averagePrice,
-        //TotalCostBuy: buy.totalCost + buy.fee,
-        TotalCostBuy: buy.totalCost,
-        //TotalCostSell: matchingSell.totalCost - matchingSell.fee,
-        TotalCostSell: matchingSell.totalCost,
-        Orders: [buy, matchingSell],
-      });
-
-      // Remove the matched sell order
-      sellOrders.splice(sellOrders.indexOf(matchingSell), 1);
-    }
-  }
-
-  return positions;
-};
