@@ -1,17 +1,9 @@
 import React from "react";
 import { LineChart } from "@mantine/charts";
-
-// Define the BalanceEntry interface
-
-// Props expected by the component
+import BalanceHistoryItem from "../components/BalanceHistoryItem";
 interface BalanceHistoryChartProps {
-  balanceHistory: BalanceEntry[];
+  balanceHistory: BalanceHistoryItem[];
 }
-
-type BalanceEntry = {
-  timestamp: string; // Assuming ISO 8601 format for simplicity
-  totalBalance: number;
-};
 
 type FormattedSlotEntry = {
   Balance: number;
@@ -19,7 +11,7 @@ type FormattedSlotEntry = {
 };
 
 const generateFormattedBalancesAtSlots = (
-  entries: BalanceEntry[]
+  entries: BalanceHistoryItem[]
 ): FormattedSlotEntry[] => {
   // Ensure entries are sorted by timestamp
   entries.sort(

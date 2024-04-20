@@ -2,10 +2,11 @@
 import { useEffect, useState } from "react";
 import { Order } from "@/interfaces/Order";
 import { Order as CCxtOrder } from "ccxt";
+import { ApiKeys } from "@/interfaces/ApiKeys";
 
 interface OrdersProps {
   orders: Order[];
-  apiKeys: 
+  apiKeys: ApiKeys;
 }
 
 const orders: React.FC<OrdersProps> = ({ orders }) => {
