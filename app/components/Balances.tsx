@@ -23,6 +23,7 @@ const exchangeSelectOptions = [
 
 const BalancesComponent: React.FC = () => {
   const [hideStables, setHideStables] = useState(false);
+  const [hideMajors, setHideMajors] = useState(false);
   const [selectedExchange, setSelectedExchange] = useState<string>("All");
   const [selectedCoin, setSelectedCoin] = useState<string>("All");
 
@@ -39,6 +40,7 @@ const BalancesComponent: React.FC = () => {
       selectedExchange,
       selectedCoin,
       hideStables,
+      hideMajors,
       openOrders,
       apiKeys,
     });
@@ -130,6 +132,15 @@ const BalancesComponent: React.FC = () => {
                   checked={hideStables}
                   onChange={(event) =>
                     setHideStables(event.currentTarget.checked)
+                  }
+                />
+              </div>
+              <div className="flex-grow p-4 text-white">
+                <Checkbox
+                  label="Hide majors"
+                  checked={hideMajors}
+                  onChange={(event) =>
+                    setHideMajors(event.currentTarget.checked)
                   }
                 />
               </div>
