@@ -9,7 +9,6 @@ import {
   Group,
 } from "@mantine/core";
 
-import { ApiKeys } from "@/interfaces/ApiKeys";
 import { useExchangeManager } from "../hooks/exchangeManager";
 
 const WalletSignIn = () => {

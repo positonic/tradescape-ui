@@ -130,7 +130,7 @@ export const useFetchBalances = ({
   selectedCoin,
   hideStables,
   hideMajors,
-  openOrders,
+  // openOrders,
   apiKeys,
 }: UseFetchBalancesProps) => {
   const [balances, setBalances] = useState<ExchangeBalance[] | null>(null);

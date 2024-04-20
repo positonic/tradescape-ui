@@ -23,7 +23,8 @@
     "clsx": "^2.1.0",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.10",
-    "next": "14.1.0",
+    "encoding": "^0.1.13",
+    "next": "^14.2.2",
     "next-themes": "^0.2.1",
     "pino-pretty": "^10.3.1",
     "react": "^18",
@@ -44,6 +45,7 @@
     "autoprefixer": "^10.0.1",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.1.0",
+    "mini-css-extract-plugin": "^2.9.0",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
