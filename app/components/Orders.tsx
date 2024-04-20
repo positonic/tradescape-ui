@@ -42,12 +42,46 @@ export default function Orders({ orders }: { orders: Order[] }) {
                   {formatDateTime(order.time)}
                 </td>
 
-                <td
-                  className={`px-6 py-4 whitespace-nowrap text-sm ${
-                    order.type === "buy" ? "text-green-500" : "text-red-500"
-                  }`}
-                >
-                  {order.type}
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {order.type === "buy" ? (
+                    <div className="flex items-center text-green-500">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 20V4M12 4L18 10M12 4L6 10"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <span className="ml-2">Buy</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center text-red-500">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 4V20M12 20L18 14M12 20L6 14"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <span className="ml-2">Sell</span>
+                    </div>
+                  )}
                 </td>
 
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

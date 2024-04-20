@@ -7,4 +7,5 @@ export type TradeResponseData = {
   orders: Order[];
   positions: Position[];
   error: string;
+  rotki?: true;
 };

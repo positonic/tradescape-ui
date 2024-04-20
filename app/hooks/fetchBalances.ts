@@ -120,6 +120,7 @@ interface UseFetchBalancesProps {
   selectedExchange: string;
   selectedCoin: string;
   hideStables: boolean;
+  hideMajors: boolean;
   openOrders: Order[];
   apiKeys: ApiKeys | undefined;
 }
@@ -128,6 +129,7 @@ export const useFetchBalances = ({
   selectedExchange,
   selectedCoin,
   hideStables,
+  hideMajors,
   openOrders,
   apiKeys,
 }: UseFetchBalancesProps) => {
@@ -189,6 +191,7 @@ export const useFetchBalances = ({
               0
             );
 
+          console.log("hideStables is ", hideStables);
           const filteredStables = hideStables
             ? filteredExchangeCoinBalances.filter(
                 (balance) =>
@@ -197,7 +200,15 @@ export const useFetchBalances = ({
                   balance.coin !== "USDC"
               )
             : filteredExchangeCoinBalances;
-          console.log("filteredStables.sort() ", filteredStables.sort());
+          const filteredHideMajors = hideMajors
+            ? filteredExchangeCoinBalances.filter(
+                (balance) =>
+                  balance.coin !== "BTC" &&
+                  balance.coin !== "ETH" &&
+                  balance.coin !== "SOL"
+              )
+            : filteredExchangeCoinBalances;
+          console.log("filteredStables.sort() ", filteredHideMajors.sort());
           setBalances(filteredStables.sort());
           setAmountInStables(amountInStables);
           setTotalBalance(totalBalance);

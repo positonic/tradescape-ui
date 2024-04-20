@@ -81,6 +81,9 @@ export default function Positions({ positions }: PositionsProps) {
                 Date
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Position Type
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Coin
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -88,9 +91,6 @@ export default function Positions({ positions }: PositionsProps) {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Duration
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Position Type
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Entry Price
@@ -117,6 +117,54 @@ export default function Positions({ positions }: PositionsProps) {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(position.Date).toLocaleString()}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {position.PositionType === "long" ? (
+                      <div className="flex items-center text-blue-500">
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M4 12L12 4L20 12M12 4V20"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <span className="ml-2">Long</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-orange-500">
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M4 12L12 20L20 12M12 20V4"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <span className="ml-2">Short</span>
+                      </div>
+                    )}
+                  </td>
+                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {position.Duration}
+                  </td> */}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    Long {Math.round(position.amount)}{" "}
+                    {position.Orders[0].pair.split("/")[0]}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {position.Orders[0].pair}
                   </td>
@@ -130,18 +178,6 @@ export default function Positions({ positions }: PositionsProps) {
                     {formatCurrency(position.ProfitLoss)}
                   </td>
 
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {position.Duration}
-                  </td>
-                  <td
-                    className={`px-6 py-4 whitespace-nowrap text-sm ${
-                      position.PositionType === "long"
-                        ? "text-green-500"
-                        : "text-red-500"
-                    }`}
-                  >
-                    {position.PositionType}
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {position.AverageEntryPrice.toFixed(2)}
                   </td>
