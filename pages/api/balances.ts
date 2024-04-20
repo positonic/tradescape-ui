@@ -1,4 +1,5 @@
 // pages/api/candles.js
+export const maxDuration = 300;
 import type { NextApiRequest, NextApiResponse } from "next";
 import ccxt from "ccxt";
 import { calculateUsdValues } from "../../prices";
