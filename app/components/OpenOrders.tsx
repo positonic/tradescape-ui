@@ -5,6 +5,7 @@ import { Order as CCxtOrder } from "ccxt";
 
 interface OrdersProps {
   orders: Order[];
+  apiKeys: 
 }
 
 const orders: React.FC<OrdersProps> = ({ orders }) => {
@@ -34,6 +35,9 @@ const orders: React.FC<OrdersProps> = ({ orders }) => {
                 Price
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Current Price
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Amount
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -59,6 +63,9 @@ const orders: React.FC<OrdersProps> = ({ orders }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {order.averagePrice}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    Current price
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {order.amount}
