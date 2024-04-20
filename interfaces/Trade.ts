@@ -3,7 +3,7 @@ export type Trade = {
   ordertxid: string;
   pair: string;
   time: number;
-  type: "buy" | "sell" | string; // Assuming type can be 'buy' or 'sell'
+  type: "buy" | "sell" | string | undefined; // Have to allow undefined due to ccxt
   ordertype: string;
   price: string;
   cost: string;
@@ -12,6 +12,6 @@ export type Trade = {
   margin: string;
   leverage: string;
   misc: string;
-  exchange: string;
+  exchange: string | undefined; // Have to allow undefined due to ccxt
   date?: Date;
 };

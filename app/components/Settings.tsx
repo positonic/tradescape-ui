@@ -105,7 +105,8 @@ const WalletSignIn = () => {
             value={bybitSecret}
             onChange={(e) => setBybitSecret(e.currentTarget.value)}
           />
-          <Group position="right" mt="md">
+          {/* <Group position="right" mt="md"> */}
+          <Group mt="md">
             <Button
               type="submit"
               className="bg-blue-500 hover:bg-blue-700 text-white"

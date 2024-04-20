@@ -34,6 +34,7 @@ export default function Market({ market }: { market: string }) {
       selectedExchange: "kraken",
       selectedCoin: "sol",
       hideStables: true,
+      hideMajors: false,
       openOrders: [],
       apiKeys,
     });
