@@ -11,23 +11,29 @@ import benefitOneImg from "@/public/img/benefit-one.png";
 import benefitTwoImg from "@/public/img/benefit-two.png";
 
 const benefitOne = {
-  title: "What's in it for you?",
-  desc: "Predict which public goods projects should be funded. Fund them, and be rewarded for their success.",
+  title: "Because execution is everything",
+  desc: "Being able to read a market and make a trade is one thing, but being able to execute on that trade with excellence is another. Tradescape is a platform that allows you to do both.",
   image: benefitOneImg,
   bullets: [
     {
-      title: "Prospectively fund projects",
-      desc: "Get projects moving forward, and receive a hypercert",
+      title: "No more journalling",
+      desc: "Journalling is no longer necessary",
       icon: <FaceSmileIcon />,
     },
     {
-      title: "Signal with your hypercerts which projects should be funded",
-      desc: "The higher your conviction, the more benefit you receive.",
+      title: "No more manually tracking your trades",
+      desc: "We do all of that for you",
       icon: <ChartBarSquareIcon />,
     },
     {
-      title: "Hypercert stakers are rewarded upon Retro payout",
+      title: "Professional tooling and trade intelligence",
       desc: "If and when someone pays for the work the project has done, you get paid.",
+      icon: <CursorArrowRaysIcon />,
+    },
+    ,
+    {
+      title: "Stop making mistakes",
+      desc: "Minimise user error and protect yourself from bad habits",
       icon: <CursorArrowRaysIcon />,
     },
   ],

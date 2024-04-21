@@ -9,7 +9,7 @@ import { MantineProvider } from "@mantine/core";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Tradescape",
+  title: "Tradescape.ai",
   description: "Your Insight, Everyone's Reward",
 };
 

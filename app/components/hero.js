@@ -10,10 +10,10 @@ const Hero = () => {
         <div className="flex items-center w-full lg:w-1/2">
           <div className="max-w-2xl mb-8">
             <h1 className="text-4xl font-bold leading-snug tracking-tight text-gray-800 lg:text-4xl lg:leading-tight xl:text-6xl xl:leading-tight dark:text-white">
-              Fix your trading
+              Free yourself ...
             </h1>
             <p className="py-5 text-xl leading-normal text-gray-500 lg:text-xl xl:text-2xl dark:text-gray-300">
-              Are you really as good as you think you are? Find out now!
+              ... from dillusion, and find financial freedom with Tradescape.
             </p>
 
             <div className="flex flex-col items-start space-y-3 sm:space-x-4 sm:space-y-0 sm:items-center sm:flex-row">
@@ -48,18 +48,17 @@ const Hero = () => {
         <div className="flex items-center justify-center w-full lg:w-1/2">
           <div className="">
             <Image
-              src={heroImg}
+              src="/img/power-tiny-gains.jpg"
               width="616"
               height="617"
               className={"object-cover"}
               alt="Hero Illustration"
               loading="eager"
-              placeholder="blur"
             />
           </div>
         </div>
       </Container>
-      <Container>
+      {/* <Container>
         <div className="flex flex-col justify-center">
           <div className="text-xl text-center text-gray-700 dark:text-white">
             Our partners
@@ -69,7 +68,7 @@ const Hero = () => {
             <Partner name="Partner 1" logo="" />
           </div>
         </div>
-      </Container>
+      </Container> */}
     </>
   );
 };
