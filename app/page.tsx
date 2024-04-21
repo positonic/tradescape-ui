@@ -14,9 +14,13 @@ const Home = () => {
   return (
     <>
       <Hero />
-      <SectionTitle pretitle="How does it work?" title=" How does it work?">
-        Predict which project will be the next big thing, and secure a vested
-        interest in it.
+      <SectionTitle
+        pretitle="What is the"
+        title="...the Aggregation of Marginal Gains"
+      >
+        It is so easy to overestimate the importance of big actions and
+        underestimate the value of consitantly making small improvements on a
+        daily basis.
       </SectionTitle>
       <Benefits data={benefitOne} />
       {/* <Benefits imgPos="right" data={benefitTwo} />

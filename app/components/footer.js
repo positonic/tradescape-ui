@@ -18,19 +18,18 @@ export default function Footer() {
                 className="flex items-center space-x-2 text-2xl font-medium text-indigo-500 dark:text-gray-100"
               >
                 <Image
-                  src="/img/hs-logo-small.jpg"
+                  src="/img/tradescape-logo.jpg"
                   alt="N"
                   width="32"
                   height="32"
                   className="w-8"
                 />
-                <span>Tradescape</span>
+                <span>Tradescape.ai</span>
               </Link>
             </div>
 
             <div className="max-w-md mt-4 text-gray-500 dark:text-gray-400">
-              Predict which project will be the next big thing, and secure a
-              vested interest in it.
+              Get out of your own way and find freedom now.
             </div>
           </div>
 
