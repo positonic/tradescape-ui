@@ -30,7 +30,7 @@ const benefitOne = {
       desc: "If and when someone pays for the work the project has done, you get paid.",
       icon: <CursorArrowRaysIcon />,
     },
-    ,
+
     {
       title: "Stop making mistakes",
       desc: "Minimise user error and protect yourself from bad habits",
