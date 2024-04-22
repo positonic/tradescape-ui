@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import {
   TextInput,
+  PasswordInput,
   Button,
   Paper,
   Title,
@@ -68,37 +69,37 @@ const WalletSignIn = () => {
           API Key and Secret Submission
         </Title>
         <form onSubmit={handleFormSubmit} className="space-y-4">
-          <TextInput
+          <PasswordInput
             label="Binance API Key"
             placeholder="Enter your Binance API Key"
             value={binanceKey}
             onChange={(e) => setBinanceKey(e.currentTarget.value)}
           />
-          <TextInput
+          <PasswordInput
             label="Binance Secret"
             placeholder="Enter your Binance Secret"
             value={binanceSecret}
             onChange={(e) => setBinanceSecret(e.currentTarget.value)}
           />
-          <TextInput
+          <PasswordInput
             label="Kraken API Key"
             placeholder="Enter your Kraken API Key"
             value={krakenKey}
             onChange={(e) => setKrakenKey(e.currentTarget.value)}
           />
-          <TextInput
+          <PasswordInput
             label="Kraken Secret"
             placeholder="Enter your Kraken Secret"
             value={krakenSecret}
             onChange={(e) => setKrakenSecret(e.currentTarget.value)}
           />
-          <TextInput
+          <PasswordInput
             label="Bybit API Key"
             placeholder="Enter your Bybit API Key"
             value={bybitKey}
             onChange={(e) => setBybitKey(e.currentTarget.value)}
           />
-          <TextInput
+          <PasswordInput
             label="Bybit Secret"
             placeholder="Enter your Bybit Secret"
             value={bybitSecret}

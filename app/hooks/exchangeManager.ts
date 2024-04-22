@@ -28,7 +28,7 @@ export const useExchangeManager = (): [
           console.log("keys: Saved encrypted keys", encryptedKeys);
           alert("Keys and secrets saved successfully!");
           console.log("redirect");
-          router.push("/balances");
+          router.push("/");
         } catch (error) {
           console.error("Failed to encrypt keys:", error);
         }
@@ -48,7 +48,6 @@ export const useExchangeManager = (): [
         }
         const { decryptedKeys } = await response.json();
 
-        console.log("keys: Decrypted keys", decryptedKeys);
         return decryptedKeys;
       } catch (error) {
         console.error("Failed to decrypt keys", error);
